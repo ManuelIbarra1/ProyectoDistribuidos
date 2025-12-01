@@ -72,9 +72,17 @@ public class AuthService {
     }
     
     public String obtenerRolDesdeToken(String token) {
+        Map<String, Object> claims = obtenerClaimsDesdeToken(token);
+        if (claims != null && claims.containsKey("rol")) {
+            return (String) claims.get("rol");
+        }
+        return null;
+    }
+
+    public Map<String, Object> obtenerClaimsDesdeToken(String token) {
         try {
             System.out.println("=".repeat(50));
-            System.out.println("🔍 [Quejas-AuthService] Obteniendo rol desde token...");
+            System.out.println("🔍 [Quejas-AuthService] Obteniendo claims desde token...");
             System.out.println("📡 authServiceUrl config: " + authServiceUrl);
             
             String url = authServiceUrl + "/auth/validar";
@@ -104,9 +112,8 @@ public class AuthService {
                 System.out.println("✓ Token válido: " + valido);
                 
                 if (Boolean.TRUE.equals(valido)) {
-                    String rol = (String) body.get("rol");
-                    System.out.println("✅ Rol obtenido: '" + rol + "'");
-                    return rol;
+                    System.out.println("✅ Claims obtenidos: " + body);
+                    return body;
                 } else {
                     System.out.println("❌ Token marcado como inválido en response");
                 }
@@ -115,7 +122,7 @@ public class AuthService {
             }
             
         } catch (Exception e) {
-            System.err.println("💥 ERROR obteniendo rol: " + e.getClass().getSimpleName());
+            System.err.println("💥 ERROR obteniendo claims: " + e.getClass().getSimpleName());
             System.err.println("💥 Mensaje: " + e.getMessage());
             
             if (e instanceof org.springframework.web.client.HttpClientErrorException) {
@@ -128,7 +135,7 @@ public class AuthService {
             System.out.println("=".repeat(50));
         }
         
-        System.out.println("❌ Retornando null - no se pudo obtener rol");
+        System.out.println("❌ Retornando null - no se pudieron obtener claims");
         return null;
     }
 }

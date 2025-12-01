@@ -31,33 +31,41 @@ public class QuejaService {
         System.out.println("=".repeat(60));
         System.out.println("🔄 [QuejaService] Iniciando creación de queja");
         System.out.println("📋 Título: " + queja.getTitulo());
-        System.out.println("👤 Usuario en queja: " + queja.getUsuario());
+        System.out.println("👤 Usuario en Body: " + queja.getUsuario());
         System.out.println("🔑 Token recibido: " + (token != null ? token.substring(0, Math.min(20, token.length())) + "..." : "null"));
+
+        // Validar token y obtener claims
+        System.out.println("🔍 Obteniendo claims desde token...");
+        Map<String, Object> claims = authService.obtenerClaimsDesdeToken(token);
         
-        // Validar que el token pertenezca al usuario que crea la queja
-        System.out.println("🔍 Obteniendo rol desde token...");
-        String rol = authService.obtenerRolDesdeToken(token);
-        System.out.println("🎭 Rol obtenido: '" + rol + "'");
-        
-        if (rol == null) {
-            System.out.println("❌ ERROR: Rol es NULL");
-            throw new RuntimeException("Solo los consumidores pueden crear quejas");
+        if (claims == null) {
+            System.out.println("❌ ERROR: Claims son NULL. Token inválido o problema de comunicación.");
+            throw new RuntimeException("Token inválido o error de autenticación.");
         }
+
+        String rol = (String) claims.get("rol");
+        String usuario = (String) claims.get("usuario");
         
+        System.out.println("🎭 Rol obtenido del token: '" + rol + "'");
+        System.out.println("👤 Usuario obtenido del token: '" + usuario + "'");
+
         if (!"consumidor".equals(rol)) {
             System.out.println("❌ ERROR: Rol '" + rol + "' no es 'consumidor'");
             throw new RuntimeException("Solo los consumidores pueden crear quejas");
         }
         
-        System.out.println("✅ Rol validado: Usuario es 'consumidor'");
-        
-        // Asignar usuario actual a la queja (si no viene)
-        if (queja.getUsuario() == null || queja.getUsuario().isEmpty()) {
-            // Necesitaríamos obtener el usuario del token
-            System.out.println("⚠️  Queja sin usuario, se necesita implementar obtención de usuario desde token");
+        if (usuario == null || usuario.isEmpty()) {
+            System.out.println("❌ ERROR: No se pudo obtener el nombre de usuario del token.");
+            throw new RuntimeException("Identidad de usuario no encontrada en el token.");
         }
+
+        System.out.println("✅ Rol validado y usuario extraído del token.");
         
-        System.out.println("💾 Guardando queja en base de datos...");
+        // Forzar el usuario del token para evitar suplantación
+        System.out.println("🔐 Forzando usuario del token en la queja...");
+        queja.setUsuario(usuario);
+        
+        System.out.println("💾 Guardando queja en base de datos para el usuario: " + queja.getUsuario());
         Queja quejaGuardada = quejaRepository.save(queja);
         System.out.println("✅ Queja guardada con ID: " + quejaGuardada.getQuejaId());
         
@@ -168,5 +176,94 @@ public class QuejaService {
         long total = quejaRepository.count();
         System.out.println("📊 [QuejaService] Total de quejas en sistema: " + total);
         return total;
+    }
+
+    public Queja actualizarQueja(String quejaId, Map<String, Object> updates, String token) {
+        System.out.println("=".repeat(60));
+        System.out.println("🔄 [QuejaService] Actualizando queja: " + quejaId);
+
+        Map<String, Object> claims = authService.obtenerClaimsDesdeToken(token);
+        if (claims == null) {
+            throw new RuntimeException("Token inválido o error de autenticación.");
+        }
+        String rol = (String) claims.get("rol");
+        String usuario = (String) claims.get("usuario");
+
+        Optional<Queja> quejaOpt = quejaRepository.findByQuejaId(quejaId);
+        if (!quejaOpt.isPresent()) {
+            throw new RuntimeException("Queja no encontrada con ID: " + quejaId);
+        }
+        Queja queja = quejaOpt.get();
+
+        if ("profeco".equals(rol)) {
+            // PROFECO puede actualizar el estado
+            if (updates.containsKey("estado")) {
+                String nuevoEstado = (String) updates.get("estado");
+                if (nuevoEstado != null && !nuevoEstado.trim().isEmpty()) {
+                    System.out.println("📝 (PROFECO) Estado actual: " + queja.getEstado() + " -> Nuevo estado: " + nuevoEstado);
+                    queja.setEstado(nuevoEstado);
+                }
+            }
+        } else if ("consumidor".equals(rol)) {
+            // Consumidor puede editar título y descripción si es suya y está en estado 'Enviada'
+            if (!queja.getUsuario().equals(usuario)) {
+                throw new RuntimeException("No tiene permiso para editar esta queja.");
+            }
+            if (!"Enviada".equalsIgnoreCase(queja.getEstado())) {
+                throw new RuntimeException("No se puede editar una queja que ya ha sido procesada.");
+            }
+
+            if (updates.containsKey("titulo")) {
+                queja.setTitulo((String) updates.get("titulo"));
+            }
+            if (updates.containsKey("descripcion")) {
+                queja.setDescripcion((String) updates.get("descripcion"));
+            }
+             if (updates.containsKey("estado")) {
+                throw new RuntimeException("Un consumidor no puede cambiar el estado de la queja.");
+            }
+        } else {
+            throw new RuntimeException("Rol no autorizado para realizar esta acción.");
+        }
+        
+        Queja quejaActualizada = quejaRepository.save(queja);
+        System.out.println("✅ Queja actualizada exitosamente.");
+        System.out.println("=".repeat(60));
+        
+        return quejaActualizada;
+    }
+
+    public void eliminarQueja(String quejaId, String token) {
+        System.out.println("=".repeat(60));
+        System.out.println("🗑️ [QuejaService] Eliminando queja: " + quejaId);
+        
+        Map<String, Object> claims = authService.obtenerClaimsDesdeToken(token);
+        if (claims == null) {
+            throw new RuntimeException("Token inválido o error de autenticación.");
+        }
+        String rol = (String) claims.get("rol");
+        String usuario = (String) claims.get("usuario");
+
+        Optional<Queja> quejaOpt = quejaRepository.findByQuejaId(quejaId);
+        if (!quejaOpt.isPresent()) {
+            throw new RuntimeException("Queja no encontrada con ID: " + quejaId);
+        }
+        Queja queja = quejaOpt.get();
+
+        boolean puedeEliminar = false;
+        if ("profeco".equals(rol)) {
+            puedeEliminar = true;
+        } else if ("consumidor".equals(rol) && queja.getUsuario().equals(usuario)) {
+            puedeEliminar = true;
+        }
+
+        if (puedeEliminar) {
+            quejaRepository.delete(queja);
+            System.out.println("✅ Queja eliminada exitosamente por usuario: " + usuario);
+        } else {
+            throw new RuntimeException("No tiene permiso para eliminar esta queja.");
+        }
+        
+        System.out.println("=".repeat(60));
     }
 }

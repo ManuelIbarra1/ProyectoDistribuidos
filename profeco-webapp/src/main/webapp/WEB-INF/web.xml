@@ -11,17 +11,6 @@
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
     
-    <!-- Filtro de autenticación para APIs -->
-    <filter>
-        <filter-name>AuthFilter</filter-name>
-        <filter-class>com.profeco.web.filter.AuthFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>AuthFilter</filter-name>
-        <url-pattern>/api/quejas/*</url-pattern>
-        <url-pattern>/api/auth/validar</url-pattern>
-    </filter-mapping>
-    
     <!-- Configuración de sesión -->
     <session-config>
         <session-timeout>30</session-timeout>

@@ -142,6 +142,47 @@ public Map<String, String> health() {
             return ResponseEntity.badRequest().body(error);
         }
     }
+
+    @PutMapping("/{quejaId}")
+    public ResponseEntity<?> actualizarQueja(@PathVariable String quejaId,
+                                                 @RequestBody Map<String, Object> updates,
+                                                 @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = extraerToken(authHeader);
+            
+            Queja quejaActualizada = quejaService.actualizarQueja(quejaId, updates, token);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("mensaje", "Queja actualizada exitosamente");
+            response.put("queja", quejaActualizada);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+    
+    @DeleteMapping("/{quejaId}")
+    public ResponseEntity<?> eliminarQueja(@PathVariable String quejaId,
+                                          @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = extraerToken(authHeader);
+            quejaService.eliminarQueja(quejaId, token);
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("mensaje", "Queja eliminada exitosamente");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (RuntimeException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
     
     private String extraerToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {

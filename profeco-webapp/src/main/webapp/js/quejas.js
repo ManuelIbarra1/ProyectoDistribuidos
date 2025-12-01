@@ -1,70 +1,75 @@
-// quejas.js - Servicio de quejas
-class QuejasService {
-    constructor() {
-        this.api = apiClient;
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    const quejaForm = document.getElementById('queja-form');
+    const quejaAlert = document.getElementById('queja-alert');
 
-    async crearQueja(quejaData) {
-        try {
-            const response = await this.api.post('/api/quejas', quejaData);
+    // Verificar si el formulario existe en la página actual
+    if (quejaForm) {
+        quejaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Mostrar un indicador de carga
+            showAlert('Enviando queja...', 'info');
+
+            const titulo = document.getElementById('titulo').value;
+            const comercio = document.getElementById('comercio').value;
+            const descripcion = document.getElementById('descripcion').value;
             
-            if (response.mensaje) {
-                return response;
-            } else {
-                throw new Error(response.error || 'Error al crear queja');
-            }
-        } catch (error) {
-            console.error('Error creating queja:', error);
-            throw error;
-        }
-    }
-
-    async getMyQuejas() {
-        try {
             const user = authService.getCurrentUser();
-            const response = await this.api.get(`/api/quejas/usuario/${user.usuario}`);
-            
-            if (response.quejas) {
-                return response.quejas;
-            } else {
-                throw new Error(response.error || 'Error al obtener quejas');
+
+            if (!user || !user.usuario) {
+                showAlert('Error: No se pudo obtener la información del usuario. Por favor, inicie sesión de nuevo.', 'danger');
+                setTimeout(() => authService.logout(), 3000);
+                return;
             }
-        } catch (error) {
-            console.error('Error getting quejas:', error);
-            throw error;
-        }
+
+            const quejaData = {
+                usuario: user.usuario,
+                titulo: titulo,
+                descripcion: descripcion,
+                comercio: comercio
+            };
+
+            try {
+                // Usar el ApiServlet como proxy
+                const response = await apiClient.post('/profeco-webapp/api/quejas', quejaData);
+
+                showAlert('¡Queja registrada con éxito! Redirigiendo al dashboard...', 'success');
+                console.log('Queja creada:', response);
+
+                // Limpiar formulario y redirigir
+                quejaForm.reset();
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+
+            } catch (error) {
+                console.error('Error al registrar la queja:', error);
+                const errorMessage = error.message || 'Ocurrió un error desconocido. Revisa la consola para más detalles.';
+                showAlert(`Error al registrar la queja: ${errorMessage}`, 'danger');
+            }
+        });
     }
 
-    async getAllQuejas() {
-        if (!authService.isProfeco()) {
-            throw new Error('No autorizado');
-        }
-        
-        try {
-            const response = await this.api.get('/api/quejas');
-            return response.quejas || [];
-        } catch (error) {
-            console.error('Error getting all quejas:', error);
-            throw error;
-        }
-    }
-
-    async getStats() {
-        if (!authService.isProfeco()) {
-            // Para consumidores, solo contar sus quejas
-            const quejas = await this.getMyQuejas();
-            return { total: quejas.length };
-        }
-        
-        try {
-            const response = await this.api.get('/api/quejas/estadisticas/total');
-            return response;
-        } catch (error) {
-            console.error('Error getting stats:', error);
-            throw error;
+    /**
+     * Muestra una alerta en el div 'queja-alert'.
+     * @param {string} message - El mensaje a mostrar.
+     * @param {string} type - El tipo de alerta (e.g., 'success', 'danger', 'info').
+     */
+    function showAlert(message, type) {
+        if (quejaAlert) {
+            quejaAlert.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            quejaAlert.classList.remove('d-none');
         }
     }
-}
-
-const quejasService = new QuejasService();
-
+    
+    // Si estamos en el dashboard, cargar las quejas
+    if (window.location.pathname.endsWith('dashboard.html')) {
+        // La lógica para cargar quejas en el dashboard iría aquí
+        console.log('En el dashboard. La carga de quejas se manejará en dashboard.js');
+    }
+});

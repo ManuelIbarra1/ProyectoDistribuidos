@@ -110,6 +110,9 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Container for the list of complaints -->
+                <div id="quejas-list-container" class="mt-4"></div>
             </main>
         </div>
     </div>
@@ -117,77 +120,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/auth.js"></script>
-    <script>
-        // ===== INICIALIZACIÓN DEL DASHBOARD =====
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard cargado');
-            
-            // Verificar autenticación
-            if (!window.authService || !window.authService.isAuthenticated()) {
-                console.warn('Usuario no autenticado, redirigiendo...');
-                window.location.href = 'login.html';
-                return;
-            }
-            
-            // Mostrar información del usuario
-            const user = window.authService.getCurrentUser();
-            if (user) {
-                // Navbar
-                document.getElementById('user-info-nav').innerHTML = `
-                    <i class="bi bi-person-circle me-1"></i> ${user.usuario}
-                    <span class="badge bg-${user.rol === 'profeco' ? 'danger' : 'success'}">
-                        ${user.rol}
-                    </span>
-                `;
-                
-                // Mensaje de bienvenida
-                document.getElementById('welcome-title').textContent = `Bienvenido, ${user.usuario}`;
-                document.getElementById('welcome-text').textContent = 
-                    `Rol: ${user.rol} - ${user.rol === 'profeco' ? 'Panel de administración' : 'Panel de consumidor'}`;
-                
-                // Cargar datos iniciales
-                loadInitialData();
-            } else {
-                window.location.href = 'login.html';
-            }
-        });
-        
-        // ===== FUNCIONES DEL DASHBOARD =====
-        function loadInitialData() {
-            console.log('Cargando datos iniciales...');
-            // Aquí podrías cargar estadísticas, quejas, etc.
-        }
-        
-        function loadCrearQueja() {
-            alert('Funcionalidad "Crear Queja" - En desarrollo');
-            // Implementar lógica para crear queja
-        }
-        
-        function loadMisQuejas() {
-            alert('Funcionalidad "Mis Quejas" - En desarrollo');
-            // Implementar lógica para listar quejas
-        }
-        
-        function logout() {
-            if (window.authService) {
-                if (confirm('¿Estás seguro de cerrar sesión?')) {
-                    window.authService.logout();
-                }
-            } else {
-                window.location.href = 'login.html';
-            }
-        }
-        
-        // ===== FUNCIONES GLOBALES =====
-        window.loadCrearQueja = loadCrearQueja;
-        window.loadMisQuejas = loadMisQuejas;
-        window.logout = logout;
-    </script>
-    <nav class="navbar">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="crear-queja.html">Nueva Queja</a>
-    <a href="mis-quejas.html">Mis Quejas</a>
-    <button onclick="logout()">Cerrar Sesión</button>
-</nav>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>
