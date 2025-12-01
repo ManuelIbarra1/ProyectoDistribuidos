@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema PROFECO - Gestión de Quejas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        
+        .header { 
+            background: rgba(255, 255, 255, 0.95); 
+            color: #2c3e50; 
+            padding: 30px; 
+            border-radius: 15px; 
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 { 
+            font-size: 2.5em; 
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .header p { 
+            font-size: 1.2em; 
+            color: #7f8c8d;
+        }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 30px; 
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 { 
+            color: #2c3e50; 
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, textarea, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ecf0f1; 
+            border-radius: 8px; 
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        button { 
+            background: linear-gradient(135deg, #3498db, #2980b9); 
+            color: white; 
+            border: none; 
+            padding: 15px 25px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .queja-item { 
+            border-left: 4px solid #3498db; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            background: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .success { 
+            color: #27ae60; 
+            padding: 15px; 
+            background: #d5f4e6; 
+            border-radius: 8px; 
+            border-left: 4px solid #27ae60;
+            margin: 15px 0;
+        }
+        
+        .error { 
+            color: #e74c3c; 
+            padding: 15px; 
+            background: #fadbd8; 
+            border-radius: 8px; 
+            border-left: 4px solid #e74c3c;
+            margin: 15px 0;
+        }
+        
+        .info { 
+            color: #3498db; 
+            padding: 15px; 
+            background: #d6eaf8; 
+            border-radius: 8px; 
+            border-left: 4px solid #3498db;
+            margin: 15px 0;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #3498db;
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .login-section {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+        }
+        
+        .login-section h2 {
+            border-bottom-color: #3498db;
+            color: white;
+        }
+        
+        .login-section label {
+            color: #ecf0f1;
+        }
+        
+        .login-section input {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+            color: white;
+        }
+        
+        .login-section input::placeholder {
+            color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏛️ SISTEMA PROFECO</h1>
+            <p>Sistema de Gestión de Quejas de Consumidores</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <div style="font-size: 2em;">📊</div>
+                    <div>Quejas Activas</div>
+                    <div id="totalQuejas">0</div>
+                </div>
+                <div class="stat-item">
+                    <div style="font-size: 2em;">✅</div>
+                    <div>Resueltas</div>
+                    <div>0</div>
+                </div>
+                <div class="stat-item">
+                    <div style="font-size: 2em;">👥</div>
+                    <div>Usuarios</div>
+                    <div>4</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Formulario de Queja -->
+            <div class="card">
+                <h2>📝 Registrar Nueva Queja</h2>
+                <form id="quejaForm">
+                    <div class="form-group">
+                        <label for="usuario">👤 Usuario:</label>
+                        <input type="text" id="usuario" name="usuario" required placeholder="Ej: juan.perez">
+                    </div>
+                    <div class="form-group">
+                        <label for="titulo">📌 Título de la Queja:</label>
+                        <input type="text" id="titulo" name="titulo" required placeholder="Ej: Producto en mal estado">
+                    </div>
+                    <div class="form-group">
+                        <label for="comercio">🏪 Comercio:</label>
+                        <input type="text" id="comercio" name="comercio" required placeholder="Ej: Supermercado ABC">
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">📄 Descripción Detallada:</label>
+                        <textarea id="descripcion" name="descripcion" rows="5" required placeholder="Describe tu queja en detalle..."></textarea>
+                    </div>
+                    <button type="submit">📨 Enviar Queja</button>
+                </form>
+                <div id="mensaje"></div>
+            </div>
+
+            <!-- Lista de Quejas -->
+            <div class="card">
+                <h2>📋 Quejas Registradas</h2>
+                <button onclick="cargarQuejas()" style="margin-bottom: 20px;">🔄 Actualizar Lista</button>
+                <div id="listaQuejas">
+                    <div class="info">Cargando quejas...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div class="card">
+            <h2>📋 Registrar Nuevo Usuario</h2>
+            <form id="registroForm">
+                <div class="form-group">
+                    <label for="nuevoUsuario">👤 Usuario:</label>
+                    <input type="text" id="nuevoUsuario" name="nuevoUsuario" required placeholder="Ej: juan.perez">
+                </div>
+                <div class="form-group">
+                    <label for="nuevaContrasena">🔐 Contraseña:</label>
+                    <input type="password" id="nuevaContrasena" name="nuevaContrasena" required placeholder="Mínimo 4 caracteres">
+                </div>
+                <button type="submit">📋 Registrar Nuevo Usuario</button>
+            </form>
+            <div id="registroStatus"></div>
+        </div>
+
+        <!-- Login para Consumidores -->
+        <div class="card">
+            <h2>👤 Acceso de Consumidores</h2>
+            <div class="form-group">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" placeholder="consumidor" value="consumidor">
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" placeholder="1234" value="1234">
+            </div>
+            <button onclick="login()">🚪 Iniciar Sesión como Consumidor</button>
+            <div id="loginStatus"></div>
+        </div>
+
+        <!-- Login para PROFECO -->
+        <div class="card login-section">
+            <h2>🔐 Acceso Administrativo PROFECO</h2>
+            <div class="form-group">
+                <label for="profecoUser">Usuario:</label>
+                <input type="text" id="profecoUser" placeholder="profeco" value="profeco">
+            </div>
+            <div class="form-group">
+                <label for="profecoPass">Contraseña:</label>
+                <input type="password" id="profecoPass" placeholder="abcd" value="abcd">
+            </div>
+            <button onclick="loginProfeco()">🔧 Iniciar Sesión como PROFECO</button>
+            <div id="profecoStatus"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/profeco-quejas/api';
+
+        // Enviar queja - SOLO CONSUMIDORES
+        document.getElementById('quejaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Verificar que el usuario esté logueado como CONSUMIDOR
+            const token = localStorage.getItem('consumidor_token');
+            
+            if (!token) {
+                document.getElementById('mensaje').innerHTML = 
+                    `<div class="error">🔒 Debes iniciar sesión como <strong>Consumidor</strong> para registrar quejas<br>
+                    <small>Usa: consumidor / 1234</small></div>`;
+                return;
+            }
+
+            const quejaData = {
+                usuario: document.getElementById('usuario').value,
+                titulo: document.getElementById('titulo').value,
+                descripcion: document.getElementById('descripcion').value,
+                comercio: document.getElementById('comercio').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/quejas`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(quejaData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('mensaje').innerHTML = 
+                        `<div class="success">✅ ¡Queja registrada exitosamente!<br>ID: ${result.id}<br>Estado: ${result.estado}</div>`;
+                    document.getElementById('quejaForm').reset();
+                    cargarQuejas(); // Actualizar lista
+                } else {
+                    document.getElementById('mensaje').innerHTML = 
+                        `<div class="error">❌ Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('mensaje').innerHTML = 
+                    `<div class="error">💥 Error de conexión: ${error.message}</div>`;
+            }
+        });
+
+        // Registro de nuevo usuario
+        document.getElementById('registroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const registroData = {
+                usuario: document.getElementById('nuevoUsuario').value,
+                contrasena: document.getElementById('nuevaContrasena').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/registro`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(registroData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('registroStatus').innerHTML = 
+                        `<div class="success">✅ ¡Usuario registrado exitosamente!<br>
+                         Ahora puedes iniciar sesión con: ${registroData.usuario}</div>`;
+                    document.getElementById('registroForm').reset();
+                } else {
+                    document.getElementById('registroStatus').innerHTML = 
+                        `<div class="error">❌ Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('registroStatus').innerHTML = 
+                    `<div class="error">💥 Error de conexión: ${error.message}</div>`;
+            }
+        });
+
+        // Cargar lista de quejas
+        async function cargarQuejas() {
+            try {
+                // Intentar con token de PROFECO primero, luego con token de consumidor
+                let token = localStorage.getItem('profeco_token') || localStorage.getItem('consumidor_token');
+                const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+                
+                console.log('🔍 Intentando cargar quejas...');
+                
+                const response = await fetch(`${API_BASE}/quejas`, { headers });
+                
+                // Verificar el tipo de contenido
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('❌ Respuesta no es JSON:', text.substring(0, 200));
+                    throw new Error('El servidor devolvió HTML en lugar de JSON');
+                }
+                
+                const data = await response.json();
+                console.log('✅ Datos recibidos:', data);
+                
+                if (response.ok) {
+                    const lista = document.getElementById('listaQuejas');
+                    if (data.quejas && data.quejas.length > 0) {
+                        lista.innerHTML = data.quejas.map(queja => `
+                            <div class="queja-item">
+                                <strong>${queja.titulo}</strong> 
+                                <span style="float: right; background: #3498db; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">
+                                    ${queja.id}
+                                </span><br>
+                                <small>👤 ${queja.usuario} | 🏪 ${queja.comercio}</small><br>
+                                <em>${queja.descripcion}</em><br>
+                                <small>📅 ${queja.fecha} | 🏷️ ${queja.estado}</small>
+                            </div>
+                        `).join('');
+                        
+                        // Actualizar estadística
+                        document.getElementById('totalQuejas').textContent = data.quejas.length;
+                    } else {
+                        lista.innerHTML = '<div class="info">No hay quejas registradas aún.</div>';
+                    }
+                } else {
+                    document.getElementById('listaQuejas').innerHTML = 
+                        `<div class="info">🔒 Inicia sesión para ver las quejas registradas</div>`;
+                }
+            } catch (error) {
+                console.error('💥 Error cargando quejas:', error);
+                document.getElementById('listaQuejas').innerHTML = 
+                    `<div class="error">💥 Error cargando quejas: ${error.message}</div>`;
+            }
+        }
+
+        // Login como CONSUMIDOR
+        async function login() {
+            const loginData = {
+                usuario: document.getElementById('username').value,
+                contrasena: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        },
+                    body: JSON.stringify(loginData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('consumidor_token', result.token);
+                    document.getElementById('loginStatus').innerHTML = 
+                        `<div class="success">✅ ¡Login exitoso como Consumidor! Ahora puedes registrar quejas.</div>`;
+                    // Auto-completar campo usuario en formulario
+                    document.getElementById('usuario').value = loginData.usuario;
+                    cargarQuejas(); // Recargar quejas
+                } else {
+                    document.getElementById('loginStatus').innerHTML = 
+                        `<div class="error">❌ Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('loginStatus').innerHTML = 
+                    `<div class="error">💥 Error de conexión</div>`;
+            }
+        }
+
+        // Login como PROFECO
+        async function loginProfeco() {
+            const loginData = {
+                usuario: document.getElementById('profecoUser').value,
+                contrasena: document.getElementById('profecoPass').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        },
+                    body: JSON.stringify(loginData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('profeco_token', result.token);
+                    document.getElementById('profecoStatus').innerHTML = 
+                        `<div class="success">✅ ¡Login exitoso como PROFECO! Ahora puedes ver todas las quejas.</div>`;
+                    cargarQuejas(); // Recargar quejas con permisos de admin
+                } else {
+                    document.getElementById('profecoStatus').innerHTML = 
+                        `<div class="error">❌ Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('profecoStatus').innerHTML = 
+                    `<div class="error">💥 Error de conexión</div>`;
+            }
+        }
+
+        // Cerrar sesión
+        function logout() {
+            localStorage.removeItem('consumidor_token');
+            localStorage.removeItem('profeco_token');
+            document.getElementById('loginStatus').innerHTML = 
+                `<div class="info">🔓 Sesión cerrada</div>`;
+            document.getElementById('profecoStatus').innerHTML = 
+                `<div class="info">🔓 Sesión cerrada</div>`;
+            document.getElementById('usuario').value = '';
+            cargarQuejas();
+        }
+
+        // Verificar estado de login al cargar la página
+        function verificarLogin() {
+            const tokenConsumidor = localStorage.getItem('consumidor_token');
+            const tokenProfeco = localStorage.getItem('profeco_token');
+            
+            if (tokenConsumidor) {
+                document.getElementById('loginStatus').innerHTML = 
+                    `<div class="success">✅ Sesión activa como Consumidor</div>`;
+            }
+            
+            if (tokenProfeco) {
+                document.getElementById('profecoStatus').innerHTML = 
+                    `<div class="success">✅ Sesión activa como PROFECO</div>`;
+            }
+        }
+
+        // Cargar quejas y verificar login al iniciar
+        cargarQuejas();
+        verificarLogin();
+    </script>
+</body>
+</html>
