@@ -1,8 +1,18 @@
 // js/dashboard-profeco.js
 
+// === VARIABLES GLOBALES ===
+let statusModalInstance = null;
+let currentQuejaId = null;
+
 // ===== INICIALIZACIÓN DEL DASHBOARD DE PROFECO =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Dashboard PROFECO cargado');
+
+    // Inicializar el modal de Bootstrap
+    const statusModalEl = document.getElementById('statusModal');
+    if (statusModalEl) {
+        statusModalInstance = new bootstrap.Modal(statusModalEl);
+    }
     
     // Verificar autenticación y rol
     if (!window.authService || !window.authService.isAuthenticated()) {
@@ -56,10 +66,25 @@ async function loadBuzonDeQuejas() {
         if (data.quejas && data.quejas.length > 0) {
             quejasHtml += '<ul class="list-group">';
             data.quejas.forEach(queja => {
-                const estado = queja.estado || 'RECIBIDA';
-                let estadoClass = 'info';
-                if (estado.toLowerCase() === 'resuelta') estadoClass = 'success';
-                if (estado.toLowerCase() === 'en progreso') estadoClass = 'warning';
+                const estado = queja.estado || 'recibida';
+                let estadoClass = 'secondary'; // Color por defecto
+                switch (estado.toLowerCase()) {
+                    case 'recibida':
+                        estadoClass = 'info';
+                        break;
+                    case 'aceptada':
+                        estadoClass = 'success';
+                        break;
+                    case 'en espera':
+                        estadoClass = 'warning';
+                        break;
+                    case 'devuelta':
+                        estadoClass = 'dark';
+                        break;
+                    case 'rechazado':
+                        estadoClass = 'danger';
+                        break;
+                }
 
                 quejasHtml += `
                     <li class="list-group-item queja-card mb-3 shadow-sm">
@@ -80,7 +105,7 @@ async function loadBuzonDeQuejas() {
                             </div>
                         </div>
                         <div class="mt-3 text-end">
-                            <button class="btn btn-sm btn-outline-primary" onclick="changeQuejaStatus('${queja.quejaId}')">
+                            <button class="btn btn-sm btn-outline-primary" onclick="changeQuejaStatus('${queja.quejaId}', '${queja.estado}')">
                                 <i class="bi bi-pencil-square me-1"></i>Cambiar Estado
                             </button>
                             <button class="btn btn-sm btn-outline-danger" onclick="deleteQueja('${queja.quejaId}')">
@@ -107,13 +132,33 @@ async function loadBuzonDeQuejas() {
     }
 }
 
-async function changeQuejaStatus(quejaId) {
-    const nuevoEstado = prompt("Ingrese el nuevo estado para la queja (ej: 'En progreso', 'Resuelta'):");
-    if (nuevoEstado && nuevoEstado.trim() !== '') {
+function changeQuejaStatus(quejaId, currentStatus) {
+    currentQuejaId = quejaId; // Guardar el ID de la queja actual
+    
+    // Actualizar el contenido del modal
+    document.getElementById('modal-queja-id').textContent = quejaId;
+    document.getElementById('new-status-select').value = currentStatus;
+
+    // Mostrar el modal
+    if (statusModalInstance) {
+        statusModalInstance.show();
+    }
+}
+
+async function saveNewStatus() {
+    const nuevoEstado = document.getElementById('new-status-select').value;
+    
+    if (currentQuejaId && nuevoEstado) {
         try {
-            await apiClient.post(`/profeco-webapp/api/quejas/${quejaId}?_method=PUT`, { estado: nuevoEstado });
+            await apiClient.post(`/profeco-webapp/api/quejas/${currentQuejaId}?_method=PUT`, { estado: nuevoEstado });
             alert('Estado de la queja actualizado con éxito.');
+            
+            if (statusModalInstance) {
+                statusModalInstance.hide();
+            }
+            
             loadBuzonDeQuejas(); // Recargar la lista
+            
         } catch (error) {
             alert(`Error al actualizar el estado: ${error.message}`);
         }
@@ -144,5 +189,8 @@ function logout() {
     }
 }
 
-// Hacer la función global para que el onclick del HTML la encuentre
+// Hacer las funciones globales para que el onclick del HTML las encuentre
 window.loadBuzonDeQuejas = loadBuzonDeQuejas;
+window.saveNewStatus = saveNewStatus;
+window.changeQuejaStatus = changeQuejaStatus;
+

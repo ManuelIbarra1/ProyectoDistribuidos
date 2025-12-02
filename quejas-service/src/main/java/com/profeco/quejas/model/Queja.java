@@ -44,7 +44,7 @@ public class Queja {
     // Constructores
     public Queja() {
         this.fecha = LocalDateTime.now();
-        this.estado = "RECIBIDA";
+        this.estado = "Enviada";
         this.quejaId = generarQuejaId();
     }
     
