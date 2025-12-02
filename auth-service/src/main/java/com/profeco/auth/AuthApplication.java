@@ -11,7 +11,13 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 public class AuthApplication {
     public static void main(String[] args) {
         new SpringApplicationBuilder(AuthApplication.class)
-            .properties("server.port=8081")
+            .properties(
+                "server.port=8081",
+                "spring.datasource.url=jdbc:h2:mem:authdb", // Base de datos en memoria
+                "spring.jpa.hibernate.ddl-auto=create",   // Crear esquema al iniciar
+                "spring.h2.console.enabled=true",         // Habilitar consola H2
+                "spring.h2.console.path=/h2-console"
+            )
             .run(args);
     }
     

@@ -9,8 +9,8 @@
         <!-- Para GlassFish usar este data source -->
         <jta-data-source>jdbc/__default</jta-data-source>
         
-        <class>models.Usuario</class>
-        <class>models.Queja</class>
+        <class>entity.User</class>
+        <class>entity.Queja</class>
         
         <properties>
             <!-- Crear tablas automáticamente -->

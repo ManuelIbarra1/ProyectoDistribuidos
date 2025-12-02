@@ -14,6 +14,7 @@ public class QuejasApplication {
         .properties(
             "server.port=8082",
             "spring.datasource.url=jdbc:h2:mem:quejasdb",
+            "spring.jpa.hibernate.ddl-auto=update", // O 'create'
             "spring.rabbitmq.host=localhost",
             // IMPORTANTE: Esta URL debe tener /api
             "auth.service.url=http://localhost:8081/api"  // ← CON /api

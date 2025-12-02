@@ -97,7 +97,7 @@ public Map<String, String> health() {
             response.put("valido", esValido);
             
             if (esValido) {
-                response.put("usuario", authService.obtenerRolDesdeToken(token));
+                response.put("usuario", authService.obtenerUsernameDesdeToken(token));
                 response.put("rol", authService.obtenerRolDesdeToken(token));
             }
             

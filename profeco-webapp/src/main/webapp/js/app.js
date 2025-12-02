@@ -2,7 +2,10 @@
 class ProfecoApp {
     constructor() {
         this.currentUser = null;
-        this.init();
+        // Solo inicializar la app si estamos en una página con el #content principal
+        if (document.getElementById('content')) {
+            this.init();
+        }
     }
 
     async init() {
@@ -12,7 +15,10 @@ class ProfecoApp {
         
         // Ocultar loading
         setTimeout(() => {
-            document.getElementById('loading').classList.add('hidden');
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.classList.add('hidden');
+            }
         }, 500);
     }
 
@@ -62,7 +68,10 @@ class ProfecoApp {
 
     showLoginView() {
         // Ocultar navbar
-        document.getElementById('navbar').classList.add('hidden');
+        const navbar = document.getElementById('navbar');
+        if (navbar) {
+            navbar.classList.add('hidden');
+        }
         
         // Mostrar template de login
         const template = document.getElementById('template-login');

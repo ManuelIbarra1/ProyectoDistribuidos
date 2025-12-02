@@ -67,9 +67,13 @@ if (typeof window.authService === 'undefined') {
                         alertDiv.classList.remove('d-none');
                     }
                     
-                    // Redirigir después de 1.5 segundos
+                    // Redirigir después de 1.5 segundos según el rol
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        if (data.rol === 'profeco') {
+                            window.location.href = 'dashboard-profeco.html';
+                        } else {
+                            window.location.href = 'dashboard.html';
+                        }
                     }, 1500);
                     
                     return data;

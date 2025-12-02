@@ -23,26 +23,47 @@ public class DataInitializer implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        // Crear usuarios por defecto si no existen
-        if (usuarioRepository.count() == 0) {
+        
+        System.out.println("🚀 [DataInitializer] Verificando usuarios por defecto (versión robusta)...");
+        
+        // --- Usuario Consumidor ---
+        if (!usuarioRepository.existsByUsername("maria@email.com")) {
             Usuario consumidor = new Usuario(
                 "maria@email.com", 
                 passwordUtil.hashPassword("password123"), 
                 "consumidor"
             );
-            
+            usuarioRepository.save(consumidor);
+            System.out.println("   ✅ Creado usuario: maria@email.com / password123");
+        } else {
+            System.out.println("   ℹ️ Usuario 'maria@email.com' ya existe.");
+        }
+        
+        // --- Usuario PROFECO (con verificación y corrección de contraseña) ---
+        String profecoUsername = "admin@profeco.gob.mx";
+        String profecoPassword = "admin123";
+        
+        if (!usuarioRepository.existsByUsername(profecoUsername)) {
             Usuario profeco = new Usuario(
-                "profeco", 
-                passwordUtil.hashPassword("abcd"), 
+                profecoUsername,
+                passwordUtil.hashPassword(profecoPassword), 
                 "profeco"
             );
-            
-            usuarioRepository.save(consumidor);
             usuarioRepository.save(profeco);
-            
-            System.out.println("✅ Usuarios por defecto creados:");
-            System.out.println("   👤 maria@email.com / password123");
-            System.out.println("   🔧 profeco / abcd");
+            System.out.println("   ✅ Creado usuario PROFECO: " + profecoUsername);
+        } else {
+            System.out.println("   ℹ️ Usuario '" + profecoUsername + "' ya existe. Verificando contraseña...");
+            Usuario profeco = usuarioRepository.findByUsername(profecoUsername).get();
+            if (!passwordUtil.checkPassword(profecoPassword, profeco.getPasswordHash())) {
+                System.out.println("   ⚠️ Contraseña de PROFECO incorrecta. ¡Actualizando!");
+                profeco.setPasswordHash(passwordUtil.hashPassword(profecoPassword));
+                usuarioRepository.save(profeco);
+                System.out.println("   ✅ Contraseña de PROFECO actualizada.");
+            } else {
+                System.out.println("   👍 Contraseña de PROFECO es correcta.");
+            }
         }
+        
+        System.out.println("🏁 [DataInitializer] Verificación completa.");
     }
 }

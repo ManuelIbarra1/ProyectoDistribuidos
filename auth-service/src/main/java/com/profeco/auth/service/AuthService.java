@@ -58,4 +58,8 @@ public class AuthService {
     public String obtenerRolDesdeToken(String token) {
         return jwtUtil.obtenerRol(token);
     }
+    
+    public String obtenerUsernameDesdeToken(String token) {
+        return jwtUtil.obtenerUsername(token);
+    }
 }

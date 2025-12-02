@@ -9,13 +9,19 @@ import java.time.LocalDateTime;
  * @author Carlo
  */
 public class Notificacion {
-private String destinatario;
+    private String destinatario;
     private String asunto;
     private String mensaje;
     private String quejaId;
     private String tipo;
     private String timestamp;
     private boolean enviada;
+
+    // --- Campos adicionales ---
+    private String usuario;
+    private String titulo;
+    private String comercio;
+    private String fecha;
     
     // Constructores, getters y setters
     public Notificacion() {}
@@ -86,8 +92,38 @@ private String destinatario;
     public void setEnviada(boolean enviada) {
         this.enviada = enviada;
     }
-    
-   
-    
-    
+
+    // --- Getters y Setters para campos adicionales ---
+
+    public String getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(String usuario) {
+        this.usuario = usuario;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public String getComercio() {
+        return comercio;
+    }
+
+    public void setComercio(String comercio) {
+        this.comercio = comercio;
+    }
+
+    public String getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(String fecha) {
+        this.fecha = fecha;
+    }
 }
