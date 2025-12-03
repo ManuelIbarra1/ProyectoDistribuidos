@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROFECO - Dashboard Administrativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --profeco-red: #d32f2f;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--profeco-red) !important;
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            min-height: calc(100vh - 56px);
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .sidebar-sticky {
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 56px);
+            padding-top: .5rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            padding: 0.75rem 1rem;
+            color: #495057;
+            border-radius: 0.375rem;
+            margin: 0.125rem 0.5rem;
+        }
+        
+        .sidebar .nav-link:hover {
+            background: #e9ecef;
+            color: var(--profeco-red);
+        }
+        
+        .sidebar .nav-link.active {
+            background: var(--profeco-red);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .stat-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .btn-profeco {
+            background-color: var(--profeco-red);
+            border-color: var(--profeco-red);
+            color: white;
+        }
+        
+        .btn-profeco:hover {
+            background-color: #b71c1c;
+            border-color: #b71c1c;
+        }
+        
+        .badge-prioridad {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-shield-check me-2"></i>PROFECO - Administración
+            </a>
+            <div class="d-flex align-items-center">
+                <span id="user-info-nav" class="me-3"></span>
+                <button onclick="logout()" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-right"></i> Salir
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 d-md-block sidebar">
+                <div class="sidebar-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <i class="bi bi-person-badge" style="font-size: 2.5rem; color: var(--profeco-red);"></i>
+                        </div>
+                        <h6 id="admin-sidebar-name" class="mb-1"></h6>
+                        <small class="text-muted">Administrador PROFECO</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">
+                                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="gestion-quejas.html">
+                                <i class="bi bi-clipboard-data me-2"></i> Gestión de Quejas
+                                <span class="badge bg-danger float-end mt-1" id="pendientes-badge">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-people me-2"></i> Consumidores
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <i class="bi bi-building me-2"></i> Empresas
+                            </a>
+                        </li>
+                        
+                    </ul>
+                    
+                    
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">
+                        <i class="bi bi-speedometer2 me-2"></i>Panel de Control
+                    </h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <button class="btn btn-profeco me-2" onclick="exportarReporte()">
+                            <i class="bi bi-download me-1"></i> Exportar
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="cargarDatos()">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Mensaje de bienvenida -->
+                <div class="alert alert-light border" id="welcome-message">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill text-danger me-3 fs-4"></i>
+                        <div>
+                            <h5 class="alert-heading mb-1" id="welcome-title">Panel de Administración PROFECO</h5>
+                            <p class="mb-0" id="welcome-text">Sistema de gestión de quejas y atención al consumidor</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="row mb-4">
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card stat-card border-0 shadow-sm">
+                            <div class="card-body text-center py-3">
+                                <div class="text-danger mb-2">
+                                    <i class="bi bi-exclamation-triangle fs-2"></i>
+                                </div>
+                                <h3 class="mb-1" id="total-quejas-admin">0</h3>
+                                <small class="text-muted">Quejas Totales</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card stat-card border-0 shadow-sm">
+                            <div class="card-body text-center py-3">
+                                <div class="text-warning mb-2">
+                                    <i class="bi bi-hourglass-split fs-2"></i>
+                                </div>
+                                <h3 class="mb-1" id="quejas-pendientes">0</h3>
+                                <small class="text-muted">Pendientes</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card stat-card border-0 shadow-sm">
+                            <div class="card-body text-center py-3">
+                                <div class="text-success mb-2">
+                                    <i class="bi bi-check-circle fs-2"></i>
+                                </div>
+                                <h3 class="mb-1" id="quejas-resueltas-admin">0</h3>
+                                <small class="text-muted">Resueltas</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card stat-card border-0 shadow-sm">
+                            <div class="card-body text-center py-3">
+                                <div class="text-info mb-2">
+                                    <i class="bi bi-people fs-2"></i>
+                                </div>
+                                <h3 class="mb-1" id="usuarios-activos">0</h3>
+                                <small class="text-muted">Usuarios</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-2 col-md-4 col-6 mb-3">
+                        <div class="card stat-card border-0 shadow-sm">
+                            <div class="card-body text-center py-3">
+                                <div class="text-primary mb-2">
+                                    <i class="bi bi-building fs-2"></i>
+                                </div>
+                                <h3 class="mb-1" id="empresas-registradas">0</h3>
+                                <small class="text-muted">Empresas</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                
+                <!-- Main Content Area -->
+                <div class="row">
+                    <!-- Left Column: Quejas Recientes -->
+                    <div class="col-lg-8 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-list-check me-2"></i> Quejas Recientes
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Folio</th>
+                                                <th>Consumidor</th>
+                                                <th>Empresa</th>
+                                                <th>Fecha</th>
+                                                <th>Estado</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="admin-quejas-table">
+                                            <tr>
+                                                <td colspan="6" class="text-center py-5">
+                                                    <div class="text-muted">
+                                                        <i class="bi bi-inbox fs-1"></i>
+                                                        <p class="mt-2">Cargando quejas...</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="gestion-quejas.html" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-arrow-right-circle me-1"></i>
+                                        Ver Todas las Quejas
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Alertas y Acciones -->
+                    <div class="col-lg-4 mb-4">
+                        <!-- Alertas -->
+                        <div class="card mb-4">
+                            
+                            <div class="card-body">
+                                <div id="alertas-container">
+                                    <div class="alert alert-warning alert-dismissible fade show mb-2" role="alert">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <small>Quejas pendientes por más de 7 días</small>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                </div>
+                               
+                            </div>
+                        </div>
+                        
+                        <!-- Acciones Rápidas -->
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-lightning me-2"></i> Acciones
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-profeco" onclick="window.location.href='gestion-quejas.html'">
+                                        <i class="bi bi-clipboard-data me-2"></i>
+                                        Gestionar Quejas
+                                    </button>
+                                    <button class="btn btn-outline-primary">
+                                        <i class="bi bi-file-earmark-plus me-2"></i>
+                                        Generar Reporte
+                                    </button>
+                                    <button class="btn btn-outline-success">
+                                        <i class="bi bi-envelope me-2"></i>
+                                        Enviar Comunicado
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-4 pt-3 border-top">
+                                    <h6 class="mb-3">Estadísticas</h6>
+                                    <div class="row text-center">
+                                        <div class="col-6 mb-3">
+                                            <div class="p-2 border rounded">
+                                                <div class="text-danger fw-bold" id="alta-priority">0</div>
+                                                <small class="text-muted">Alta Prioridad</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <div class="p-2 border rounded">
+                                                <div class="text-warning fw-bold" id="media-priority">0</div>
+                                                <small class="text-muted">Media Prioridad</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 border rounded">
+                                                <div class="text-success fw-bold" id="resuelto-hoy">0</div>
+                                                <small class="text-muted">Resueltas Hoy</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="p-2 border rounded">
+                                                <div class="text-info fw-bold" id="nuevas-hoy">0</div>
+                                                <small class="text-muted">Nuevas Hoy</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+               
+            </main>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let chartInstances = {};
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // ===== VERIFICACIÓN DE AUTENTICACIÓN Y ROL =====
+            if (!window.authService || !window.authService.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const user = window.authService.getCurrentUser();
+            if (!user || !authService.isAdmin()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Mostrar información del administrador
+            const displayName = user.nombre || user.usuario || user.correo || 'Administrador';
+            
+            // Navbar
+            document.getElementById('user-info-nav').innerHTML = `
+                <i class="bi bi-person-badge me-1"></i> ${displayName}
+                <span class="badge bg-danger">admin</span>
+            `;
+            
+            // Sidebar
+            document.getElementById('admin-sidebar-name').textContent = displayName;
+            
+            // Mensaje de bienvenida
+            document.getElementById('welcome-title').textContent = `Bienvenido, ${displayName}`;
+            document.getElementById('welcome-text').textContent = 'Panel de administración del sistema PROFECO';
+            
+            // Cargar datos administrativos REALES
+            cargarDatos();
+            
+            // Actualizar cada 30 segundos
+            setInterval(cargarDatos, 30000);
+        });
+        
+        async function cargarDatos() {
+            try {
+                // Obtener todas las quejas
+                const response = await authService.authenticatedFetch('/api/quejas');
+                
+                if (response && response.quejas) {
+                    const quejas = response.quejas;
+                    const totalQuejas = quejas.length;
+                    const pendientes = quejas.filter(q => q.estado === 'RECIBIDA').length;
+                    const resueltas = quejas.filter(q => q.estado === 'RESUELTA').length;
+                    const enProceso = quejas.filter(q => q.estado === 'EN_PROCESO').length;
+                    
+                    // Actualizar estadísticas principales
+                    document.getElementById('total-quejas-admin').textContent = totalQuejas.toLocaleString();
+                    document.getElementById('quejas-pendientes').textContent = pendientes;
+                    document.getElementById('quejas-resueltas-admin').textContent = resueltas.toLocaleString();
+                    document.getElementById('pendientes-badge').textContent = pendientes;
+                    
+                    // Calcular estadísticas rápidas
+                    const hoy = new Date().toISOString().split('T')[0];
+                    const nuevasHoy = quejas.filter(q => {
+                        const fechaQueja = new Date(q.fecha).toISOString().split('T')[0];
+                        return fechaQueja === hoy;
+                    }).length;
+                    
+                    document.getElementById('alta-priority').textContent = pendientes;
+                    document.getElementById('media-priority').textContent = enProceso;
+                    document.getElementById('resuelto-hoy').textContent = resueltas;
+                    document.getElementById('nuevas-hoy').textContent = nuevasHoy;
+                    
+                    // Actualizar tabla de quejas
+                    actualizarTablaQuejas(quejas.slice(0, 10));
+                    
+                    // Actualizar gráficos
+                    actualizarGraficos(quejas);
+                    
+                    // Actualizar alertas
+                    actualizarAlertas(quejas);
+                }
+            } catch (error) {
+                console.error('Error cargando datos admin:', error);
+                document.getElementById('admin-quejas-table').innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Error al cargar las quejas
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function actualizarTablaQuejas(quejas) {
+            const tableBody = document.getElementById('admin-quejas-table');
+            
+            if (quejas.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox fs-1"></i>
+                                <p class="mt-2">No hay quejas registradas</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            quejas.forEach(queja => {
+                const fecha = new Date(queja.fecha).toLocaleDateString('es-MX');
+                const estadoClass = getEstadoBadgeClass(queja.estado);
+                const estadoText = getEstadoText(queja.estado);
+                
+                html += `
+                    <tr>
+                        <td><strong>${queja.quejaId || 'N/A'}</strong></td>
+                        <td>${queja.usuario || 'N/A'}</td>
+                        <td>${queja.comercio || 'N/A'}</td>
+                        <td><small>${fecha}</small></td>
+                        <td>
+                            <span class="badge ${estadoClass}">
+                                ${estadoText}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="verDetalleQueja('${queja.quejaId}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+        
+        function actualizarGraficos(quejas) {
+            // Gráfico de quejas por mes
+            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const quejasPorMes = Array(12).fill(0);
+            
+            quejas.forEach(q => {
+                const fecha = new Date(q.fecha);
+                const mes = fecha.getMonth();
+                quejasPorMes[mes]++;
+            });
+            
+            const ctx1 = document.getElementById('quejasChart');
+            if (ctx1) {
+                if (chartInstances.quejasChart) {
+                    chartInstances.quejasChart.destroy();
+                }
+                
+                chartInstances.quejasChart = new Chart(ctx1.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: meses,
+                        datasets: [{
+                            label: 'Quejas Registradas',
+                            data: quejasPorMes,
+                            backgroundColor: 'rgba(211, 47, 47, 0.7)',
+                            borderColor: 'rgba(211, 47, 47, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de resolución
+            const estados = {
+                'RESUELTA': quejas.filter(q => q.estado === 'RESUELTA').length,
+                'EN_PROCESO': quejas.filter(q => q.estado === 'EN_PROCESO').length,
+                'RECIBIDA': quejas.filter(q => q.estado === 'RECIBIDA').length
+            };
+            
+            const ctx2 = document.getElementById('resolutionChart');
+            if (ctx2) {
+                if (chartInstances.resolutionChart) {
+                    chartInstances.resolutionChart.destroy();
+                }
+                
+                chartInstances.resolutionChart = new Chart(ctx2.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Resueltas', 'En Proceso', 'Pendientes'],
+                        datasets: [{
+                            data: [estados.RESUELTA, estados.EN_PROCESO, estados.RECIBIDA],
+                            backgroundColor: [
+                                'rgba(76, 175, 80, 0.7)',
+                                'rgba(33, 150, 243, 0.7)',
+                                'rgba(255, 152, 0, 0.7)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+        }
+        
+        function actualizarAlertas(quejas) {
+            const container = document.getElementById('alertas-container');
+            const alertas = [];
+            
+            // Quejas pendientes por más de 7 días
+            const quejasAntiguas = quejas.filter(q => {
+                const fechaQueja = new Date(q.fecha);
+                const dias = Math.floor((new Date() - fechaQueja) / (1000 * 60 * 60 * 24));
+                return q.estado === 'RECIBIDA' && dias > 7;
+            });
+            
+            if (quejasAntiguas.length > 0) {
+                alertas.push({
+                    tipo: 'warning',
+                    mensaje: `${quejasAntiguas.length} quejas pendientes por más de 7 días`
+                });
+            }
+            
+            // Empresas con múltiples quejas
+            const quejasPorEmpresa = {};
+            quejas.forEach(q => {
+                if (q.comercio) {
+                    quejasPorEmpresa[q.comercio] = (quejasPorEmpresa[q.comercio] || 0) + 1;
+                }
+            });
+            
+            Object.entries(quejasPorEmpresa).forEach(([empresa, count]) => {
+                if (count > 3) {
+                    alertas.push({
+                        tipo: 'danger',
+                        mensaje: `Empresa "${empresa}" tiene ${count} quejas`
+                    });
+                }
+            });
+            
+            // Mostrar alertas
+            if (alertas.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show mb-2" role="alert">
+                        <i class="bi bi-check-circle me-2"></i>
+                        <small>No hay alertas urgentes</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = alertas.map(alerta => `
+                    <div class="alert alert-${alerta.tipo} alert-dismissible fade show mb-2" role="alert">
+                        <i class="bi ${alerta.tipo === 'warning' ? 'bi-exclamation-triangle' : 'bi-exclamation-circle'} me-2"></i>
+                        <small>${alerta.mensaje}</small>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function getEstadoBadgeClass(estado) {
+            switch(estado?.toUpperCase()) {
+                case 'RECIBIDA': return 'bg-warning';
+                case 'EN_PROCESO': return 'bg-info';
+                case 'RESUELTA': return 'bg-success';
+                default: return 'bg-secondary';
+            }
+        }
+        
+        function getEstadoText(estado) {
+            switch(estado?.toUpperCase()) {
+                case 'RECIBIDA': return 'Pendiente';
+                case 'EN_PROCESO': return 'En Proceso';
+                case 'RESUELTA': return 'Resuelta';
+                default: return estado || 'Desconocido';
+            }
+        }
+        
+        function verDetalleQueja(quejaId) {
+            window.location.href = `detalle-queja.html?id=${quejaId}`;
+        }
+        
+        function exportarReporte() {
+            alert('Funcionalidad de exportación en desarrollo');
+        }
+        
+        function markAllAlertsRead() {
+            document.querySelectorAll('.alert').forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+            
+            setTimeout(() => {
+                document.getElementById('alertas-container').innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check-circle fs-1"></i>
+                        <p class="mt-2 mb-0">Todas las alertas leídas</p>
+                    </div>
+                `;
+            }, 300);
+        }
+        
+        function logout() {
+            if (window.authService) {
+                if (confirm('¿Estás seguro de cerrar sesión?')) {
+                    window.authService.logout();
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+        
+        // Hacer funciones globales
+        window.cargarDatos = cargarDatos;
+        window.exportarReporte = exportarReporte;
+        window.markAllAlertsRead = markAllAlertsRead;
+        window.verDetalleQueja = verDetalleQueja;
+        window.logout = logout;
+    </script>
+</body>
+</html>

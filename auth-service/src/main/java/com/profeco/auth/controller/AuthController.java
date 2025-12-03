@@ -6,6 +6,7 @@ package com.profeco.auth.controller;
 
 import com.profeco.auth.model.Usuario;
 import com.profeco.auth.service.AuthService;
+import com.profeco.auth.security.JwtUtil; // ← Añadir esta importación
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,26 +17,53 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-//@CrossOrigin(origins = "*")
 public class AuthController {
     
     @Autowired
     private AuthService authService;
     
+    @Autowired  // ← AÑADIR ESTA INYECCIÓN
+    private JwtUtil jwtUtil;
+    
     @GetMapping("/test")
-public Map<String, String> test() {
-    return Map.of(
-        "service", "auth-service",
-        "status", "OK", 
-        "port", "8081",
-        "time", new Date().toString()
-    );
-}
-
-@GetMapping("/health")
-public Map<String, String> health() {
-    return Map.of("status", "UP", "service", "auth-service");
-}
+    public Map<String, String> test() {
+        return Map.of(
+            "service", "auth-service",
+            "status", "OK", 
+            "port", "8081",
+            "time", new Date().toString()
+        );
+    }
+    
+    @GetMapping("/health")
+    public Map<String, String> health() {
+        return Map.of("status", "UP", "service", "auth-service");
+    }
+    
+    // Método nuevo corregido
+    @GetMapping("/usuario")
+    public ResponseEntity<?> obtenerUsuario(@RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(401).body(Map.of("error", "Token no proporcionado"));
+            }
+            
+            String token = authHeader.substring(7);
+            
+            // Usar jwtUtil inyectado
+            String username = jwtUtil.obtenerUsername(token);
+            String rol = jwtUtil.obtenerRol(token);
+            
+            Map<String, String> response = new HashMap<>();
+            response.put("username", username);
+            response.put("rol", rol);
+            response.put("fechaLogin", new Date().toString());
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(Map.of("error", "Token inválido"));
+        }
+    }
     
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -60,7 +88,6 @@ public Map<String, String> health() {
     @PostMapping("/registro")
     public ResponseEntity<?> registro(@RequestBody RegistroRequest request) {
         try {
-            // Por defecto, nuevos usuarios son "consumidor"
             String rol = request.getRol() != null ? request.getRol() : "consumidor";
             
             Usuario usuario = authService.registrarUsuario(
@@ -97,8 +124,11 @@ public Map<String, String> health() {
             response.put("valido", esValido);
             
             if (esValido) {
-                response.put("usuario", authService.obtenerRolDesdeToken(token));
-                response.put("rol", authService.obtenerRolDesdeToken(token));
+                // Corregir estos dos campos
+                String username = jwtUtil.obtenerUsername(token); // ← Usar jwtUtil aquí también
+                String rol = jwtUtil.obtenerRol(token); // ← Y aquí
+                response.put("usuario", username);
+                response.put("rol", rol);
             }
             
             return ResponseEntity.ok(response);
@@ -115,7 +145,6 @@ public Map<String, String> health() {
         private String usuario;
         private String contrasena;
         
-        // Getters y Setters
         public String getUsuario() { return usuario; }
         public void setUsuario(String usuario) { this.usuario = usuario; }
         public String getContrasena() { return contrasena; }
@@ -127,7 +156,6 @@ public Map<String, String> health() {
         private String contrasena;
         private String rol;
         
-        // Getters y Setters
         public String getUsuario() { return usuario; }
         public void setUsuario(String usuario) { this.usuario = usuario; }
         public String getContrasena() { return contrasena; }

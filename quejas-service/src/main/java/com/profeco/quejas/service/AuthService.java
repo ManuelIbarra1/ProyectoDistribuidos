@@ -1,21 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.profeco.quejas.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class AuthService {
     
-    // CORREGIR ESTA LÍNEA: AGREGAR /api
-    @Value("${auth.service.url:http://localhost:8081/api}")
+    // ✅ CORREGIDO: Solo base URL, sin /api/auth
+    @Value("${auth.service.url:http://localhost:8085}")
     private String authServiceUrl;
     
     private final RestTemplate restTemplate;
@@ -25,13 +20,14 @@ public class AuthService {
     }
     
     public boolean validarToken(String token) {
+        System.out.println("=".repeat(50));
+        System.out.println("🔐 [Quejas-AuthService] Validando token via Gateway...");
+        System.out.println("📡 Gateway URL: " + authServiceUrl);
+        
         try {
-            System.out.println("=".repeat(50));
-            System.out.println("🔐 [Quejas-AuthService] Validando token...");
-            System.out.println("📡 authServiceUrl config: " + authServiceUrl);
-            
-            String url = authServiceUrl + "/auth/validar";
-            System.out.println("🌐 URL completa: " + url);
+            // ✅ CORREGIDO: URL correcta
+            String url = authServiceUrl + "/api/auth/validar";
+            System.out.println("✅ URL CORRECTA: " + url);
             System.out.println("🔑 Token (truncado): " + 
                 (token != null && token.length() > 20 ? token.substring(0, 20) + "..." : token));
             
@@ -41,7 +37,7 @@ public class AuthService {
             
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
-            System.out.println("📤 Enviando POST a Auth Service...");
+            System.out.println("📤 Enviando POST a Gateway...");
             ResponseEntity<Map> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
@@ -52,33 +48,32 @@ public class AuthService {
             System.out.println("📥 Response Status: " + response.getStatusCode());
             
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-                boolean esValido = Boolean.TRUE.equals(response.getBody().get("valido"));
+                Map<String, Object> body = response.getBody();
+                boolean esValido = Boolean.TRUE.equals(body.get("valido"));
                 System.out.println("✅ Token válido: " + esValido);
-                System.out.println("📊 Response Body: " + response.getBody());
+                System.out.println("📊 Response Body: " + body);
+                System.out.println("=".repeat(50));
                 return esValido;
             }
             
         } catch (Exception e) {
             System.err.println("💥 ERROR validando token: " + e.getMessage());
-            if (e.getMessage().contains("404")) {
-                System.err.println("⚠️  Posible problema de URL. Verifica que exista: " + authServiceUrl + "/auth/validar");
-                System.err.println("⚠️  Auth Service debe estar en: http://localhost:8081/api/auth/validar");
-            }
-        } finally {
-            System.out.println("=".repeat(50));
+            System.err.println("⚠️  URL intentada: " + authServiceUrl + "/api/auth/validar");
         }
         
+        System.out.println("❌ Token inválido o error en validación");
+        System.out.println("=".repeat(50));
         return false;
     }
     
     public String obtenerRolDesdeToken(String token) {
+        System.out.println("=".repeat(50));
+        System.out.println("🔍 [Quejas-AuthService] Obteniendo rol desde token...");
+        
         try {
-            System.out.println("=".repeat(50));
-            System.out.println("🔍 [Quejas-AuthService] Obteniendo rol desde token...");
-            System.out.println("📡 authServiceUrl config: " + authServiceUrl);
-            
-            String url = authServiceUrl + "/auth/validar";
-            System.out.println("🌐 URL completa: " + url);
+            // ✅ CORREGIDO
+            String url = authServiceUrl + "/api/auth/validar";
+            System.out.println("✅ URL CORRECTA: " + url);
             
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + token);
@@ -86,7 +81,7 @@ public class AuthService {
             
             HttpEntity<String> entity = new HttpEntity<>(headers);
             
-            System.out.println("📤 Enviando POST a Auth Service...");
+            System.out.println("📤 Enviando POST a Gateway para obtener rol...");
             ResponseEntity<Map> response = restTemplate.exchange(
                 url,
                 HttpMethod.POST,
@@ -106,29 +101,65 @@ public class AuthService {
                 if (Boolean.TRUE.equals(valido)) {
                     String rol = (String) body.get("rol");
                     System.out.println("✅ Rol obtenido: '" + rol + "'");
+                    System.out.println("=".repeat(50));
                     return rol;
-                } else {
-                    System.out.println("❌ Token marcado como inválido en response");
                 }
-            } else {
-                System.out.println("❌ Response no es OK o body es null");
             }
             
         } catch (Exception e) {
-            System.err.println("💥 ERROR obteniendo rol: " + e.getClass().getSimpleName());
-            System.err.println("💥 Mensaje: " + e.getMessage());
-            
-            if (e instanceof org.springframework.web.client.HttpClientErrorException) {
-                org.springframework.web.client.HttpClientErrorException ex = 
-                    (org.springframework.web.client.HttpClientErrorException) e;
-                System.err.println("💥 Status Code: " + ex.getStatusCode());
-                System.err.println("💥 Response Body: " + ex.getResponseBodyAsString());
-            }
-        } finally {
-            System.out.println("=".repeat(50));
+            System.err.println("💥 ERROR obteniendo rol: " + e.getMessage());
         }
         
         System.out.println("❌ Retornando null - no se pudo obtener rol");
+        System.out.println("=".repeat(50));
+        return null;
+    }
+    
+    public String obtenerUsuarioDesdeToken(String token) {
+        System.out.println("=".repeat(50));
+        System.out.println("👤 [Quejas-AuthService] Obteniendo usuario desde token...");
+        
+        try {
+            // ✅ CORREGIDO
+            String url = authServiceUrl + "/api/auth/validar";
+            System.out.println("✅ URL CORRECTA: " + url);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+            
+            System.out.println("📤 Enviando POST a Gateway para obtener usuario...");
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                entity,
+                Map.class
+            );
+            
+            System.out.println("📥 Response Status: " + response.getStatusCode());
+            
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                Map<String, Object> body = response.getBody();
+                
+                Boolean valido = (Boolean) body.get("valido");
+                System.out.println("✓ Token válido: " + valido);
+                
+                if (Boolean.TRUE.equals(valido)) {
+                    String usuario = (String) body.get("usuario");
+                    System.out.println("✅ Usuario obtenido: '" + usuario + "'");
+                    System.out.println("=".repeat(50));
+                    return usuario;
+                }
+            }
+            
+        } catch (Exception e) {
+            System.err.println("💥 ERROR obteniendo usuario: " + e.getMessage());
+        }
+        
+        System.out.println("❌ No se pudo obtener usuario del token");
+        System.out.println("=".repeat(50));
         return null;
     }
 }

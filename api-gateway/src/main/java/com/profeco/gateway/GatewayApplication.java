@@ -41,26 +41,26 @@ public class GatewayApplication {
     }
     
     // ⭐⭐⭐ FILTRO CORS SUPER PERMISIVO (SOLO DESARROLLO) ⭐⭐⭐
-    @Bean
-    public WebFilter corsFilter() {
-        return (ServerWebExchange ctx, WebFilterChain chain) -> {
-            ServerHttpRequest request = ctx.getRequest();
-            ServerHttpResponse response = ctx.getResponse();
-            
-            // Agregar headers CORS a TODAS las respuestas
-            response.getHeaders().add("Access-Control-Allow-Origin", "*");
-            response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-            response.getHeaders().add("Access-Control-Allow-Headers", "*");
-            response.getHeaders().add("Access-Control-Allow-Credentials", "true");
-            response.getHeaders().add("Access-Control-Max-Age", "3600");
-            
-            // Si es OPTIONS (preflight), responder OK inmediatamente
-            if (request.getMethod() == HttpMethod.OPTIONS) {
-                response.setStatusCode(HttpStatus.OK);
-                return Mono.empty();
-            }
-            
-            return chain.filter(ctx);
-        };
-    }
+    // En GatewayApplication.java - YA LO TIENES BIEN
+@Bean
+public WebFilter corsFilter() {
+    return (ServerWebExchange ctx, WebFilterChain chain) -> {
+        ServerHttpRequest request = ctx.getRequest();
+        ServerHttpResponse response = ctx.getResponse();
+        
+        // Permitir GlassFish (8080)
+        response.getHeaders().add("Access-Control-Allow-Origin", "http://localhost:8080");
+        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.getHeaders().add("Access-Control-Allow-Headers", "*");
+        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        response.getHeaders().add("Access-Control-Max-Age", "3600");
+        
+        if (request.getMethod() == HttpMethod.OPTIONS) {
+            response.setStatusCode(HttpStatus.OK);
+            return Mono.empty();
+        }
+        
+        return chain.filter(ctx);
+    };
+}
 }

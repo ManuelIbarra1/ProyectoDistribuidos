@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROFECO - Detalle de Queja</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root { --profeco-red: #d32f2f; }
+        .navbar-brand { font-weight: bold; color: var(--profeco-red) !important; }
+        .bg-profeco { background-color: var(--profeco-red) !important; }
+        .btn-profeco { background-color: var(--profeco-red); border-color: var(--profeco-red); color: white; }
+        
+        .badge-estado { padding: 5px 10px; border-radius: 20px; }
+        .badge-pendiente { background-color: #ffc107; color: black; }
+        .badge-proceso { background-color: #17a2b8; color: white; }
+        .badge-resuelta { background-color: #28a745; color: white; }
+        
+        .timeline { position: relative; padding-left: 30px; }
+        .timeline::before { content: ''; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; background: #dee2e6; }
+        .timeline-item { position: relative; margin-bottom: 20px; }
+        .timeline-item::before { content: ''; position: absolute; left: -25px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--profeco-red); }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-profeco shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="gestion-quejas.html">
+                <i class="bi bi-shield-check me-2"></i>PROFECO - Detalle de Queja
+            </a>
+            <div class="d-flex align-items-center">
+                <span id="admin-name-nav" class="text-light me-3"></span>
+                <a href="gestion-quejas.html" class="btn btn-outline-light btn-sm me-2">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Contenido Principal -->
+    <div class="container-fluid py-4">
+        <div id="alert-container"></div>
+        
+        <div id="loading" class="text-center py-5">
+            <div class="spinner-border text-danger" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3">Cargando detalles de la queja...</p>
+        </div>
+        
+        <div id="queja-detalle" class="d-none">
+            <!-- Header con información básica -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h3 id="queja-titulo" class="mb-2"></h3>
+                            <div class="d-flex align-items-center mb-3">
+                                <span id="queja-estado" class="badge-estado me-3"></span>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    <span id="queja-fecha"></span>
+                                </small>
+                            </div>
+                            <p id="queja-descripcion" class="text-muted"></p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title">Información</h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <strong>Folio:</strong><br>
+                                            <code id="queja-folio"></code>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Consumidor:</strong><br>
+                                            <span id="queja-consumidor"></span>
+                                        </li>
+                                        <li class="mb-2">
+                                            <strong>Comercio:</strong><br>
+                                            <span id="queja-comercio"></span>
+                                        </li>
+                                        <li>
+                                            <strong>ID Interno:</strong><br>
+                                            <small class="text-muted" id="queja-id"></small>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel de Acciones -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-gear me-2"></i>Acciones
+                            </h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-profeco" onclick="cambiarEstado()">
+                                    <i class="bi bi-arrow-repeat me-2"></i>Cambiar Estado
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="asignarAgente()">
+                                    <i class="bi bi-person-plus me-2"></i>Asignar Agente
+                                </button>
+                                <button class="btn btn-outline-success" onclick="agregarComentario()">
+                                    <i class="bi bi-chat-dots me-2"></i>Agregar Comentario
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="enviarNotificacion()">
+                                    <i class="bi bi-envelope me-2"></i>Enviar Notificación
+                                </button>
+                                <button class="btn btn-outline-dark" onclick="imprimirDetalle()">
+                                    <i class="bi bi-printer me-2"></i>Imprimir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Historial y Comentarios -->
+            <div class="row">
+                <div class="col-lg-8 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">
+                                <i class="bi bi-clock-history me-2"></i>Historial
+                            </h5>
+                            <div id="historial-container" class="timeline">
+                                <!-- Se llena dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title mb-4">
+                                <i class="bi bi-chat-text me-2"></i>Comentarios
+                            </h5>
+                            <div id="comentarios-container">
+                                <!-- Se llena dinámicamente -->
+                            </div>
+                            <div class="mt-3">
+                                <textarea class="form-control" id="nuevo-comentario" rows="3" 
+                                          placeholder="Escribe un comentario..."></textarea>
+                                <button class="btn btn-profeco w-100 mt-2" onclick="guardarComentario()">
+                                    <i class="bi bi-send me-2"></i>Guardar Comentario
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Queja no encontrada -->
+        <div id="queja-no-encontrada" class="d-none text-center py-5">
+            <i class="bi bi-exclamation-triangle fs-1 text-warning"></i>
+            <h3 class="mt-3">Queja no encontrada</h3>
+            <p class="text-muted">La queja que buscas no existe o no tienes permisos para verla.</p>
+            <a href="gestion-quejas.html" class="btn btn-profeco mt-3">
+                <i class="bi bi-arrow-left me-2"></i>Volver a Gestión de Quejas
+            </a>
+        </div>
+    </div>
+    
+    <!-- Modal para Cambiar Estado -->
+    <div class="modal fade" id="modalEstado">
+        <!-- Similar al modal de gestion-quejas.html -->
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let quejaActual = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticación y rol
+            if (!window.authService || !window.authService.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const user = authService.getCurrentUser();
+            if (!user || !authService.isAdmin()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Mostrar nombre del administrador
+            const displayName = user.nombre || user.usuario || user.correo || 'Administrador';
+            document.getElementById('admin-name-nav').textContent = displayName;
+            
+            // Obtener ID de la queja de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const quejaId = urlParams.get('id');
+            
+            if (quejaId) {
+                cargarDetalleQueja(quejaId);
+            } else {
+                mostrarQuejaNoEncontrada();
+            }
+        });
+        
+        async function cargarDetalleQueja(quejaId) {
+            try {
+                // Primero obtener todas las quejas y filtrar
+                const response = await authService.authenticatedFetch('/api/quejas');
+                
+                if (response && response.quejas) {
+                    quejaActual = response.quejas.find(q => q.quejaId === quejaId);
+                    
+                    if (quejaActual) {
+                        mostrarDetalleQueja(quejaActual);
+                        cargarHistorial(quejaId);
+                        cargarComentarios(quejaId);
+                    } else {
+                        mostrarQuejaNoEncontrada();
+                    }
+                } else {
+                    throw new Error('Formato de respuesta inválido');
+                }
+                
+            } catch (error) {
+                console.error('Error cargando detalle:', error);
+                mostrarError('No se pudo cargar el detalle de la queja: ' + error.message);
+                mostrarQuejaNoEncontrada();
+            }
+        }
+        
+        function mostrarDetalleQueja(queja) {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('queja-detalle').classList.remove('d-none');
+            
+            // Información básica
+            document.getElementById('queja-titulo').textContent = queja.titulo || 'Sin título';
+            document.getElementById('queja-descripcion').textContent = queja.descripcion || 'Sin descripción';
+            document.getElementById('queja-folio').textContent = queja.quejaId || 'N/A';
+            document.getElementById('queja-id').textContent = queja.id || 'N/A';
+            document.getElementById('queja-consumidor').textContent = queja.usuario || 'N/A';
+            document.getElementById('queja-comercio').textContent = queja.comercio || 'N/A';
+            
+            // Fecha formateada
+            const fecha = new Date(queja.fecha);
+            document.getElementById('queja-fecha').textContent = 
+                fecha.toLocaleDateString('es-MX', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            
+            // Estado con badge
+            const estadoElement = document.getElementById('queja-estado');
+            const estadoClass = {
+                'RECIBIDA': 'badge-pendiente',
+                'EN_PROCESO': 'badge-proceso',
+                'RESUELTA': 'badge-resuelta'
+            }[queja.estado] || '';
+            
+            const estadoText = {
+                'RECIBIDA': 'Pendiente',
+                'EN_PROCESO': 'En Proceso',
+                'RESUELTA': 'Resuelta'
+            }[queja.estado] || queja.estado || 'Desconocido';
+            
+            estadoElement.className = `badge-estado ${estadoClass}`;
+            estadoElement.textContent = estadoText;
+        }
+        
+        async function cargarHistorial(quejaId) {
+            // Por ahora usamos datos de ejemplo
+            const historial = [
+                { fecha: new Date().toISOString(), evento: 'Queja registrada en el sistema', usuario: 'Sistema' },
+                { fecha: new Date().toISOString(), evento: 'Asignada para revisión', usuario: 'Administrador' }
+            ];
+            
+            const container = document.getElementById('historial-container');
+            container.innerHTML = historial.map(item => `
+                <div class="timeline-item">
+                    <h6 class="mb-1">${item.evento}</h6>
+                    <small class="text-muted d-block mb-1">
+                        ${new Date(item.fecha).toLocaleDateString('es-MX', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        })}
+                    </small>
+                    <small class="text-muted">Por: ${item.usuario}</small>
+                </div>
+            `).join('');
+        }
+        
+        async function cargarComentarios(quejaId) {
+            // Por ahora usamos datos de ejemplo
+            const comentarios = [
+                { fecha: new Date().toISOString(), texto: 'Se requiere más información del consumidor', usuario: 'Agente 1' },
+                { fecha: new Date().toISOString(), texto: 'Contactado al comercio para aclaración', usuario: 'Agente 2' }
+            ];
+            
+            const container = document.getElementById('comentarios-container');
+            container.innerHTML = comentarios.map(comentario => `
+                <div class="card mb-2">
+                    <div class="card-body p-3">
+                        <p class="card-text mb-2">${comentario.texto}</p>
+                        <small class="text-muted">
+                            ${comentario.usuario} • 
+                            ${new Date(comentario.fecha).toLocaleDateString('es-MX', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                            })}
+                        </small>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function cambiarEstado() {
+            if (!quejaActual) return;
+            
+            // Implementar lógica para cambiar estado
+            alert(`Cambiar estado de queja ${quejaActual.quejaId} - En desarrollo`);
+        }
+        
+        function asignarAgente() {
+            if (!quejaActual) return;
+            alert(`Asignar agente a queja ${quejaActual.quejaId} - En desarrollo`);
+        }
+        
+        function agregarComentario() {
+            if (!quejaActual) return;
+            document.getElementById('nuevo-comentario').focus();
+        }
+        
+        async function guardarComentario() {
+            const texto = document.getElementById('nuevo-comentario').value.trim();
+            if (!texto) {
+                mostrarError('Escribe un comentario antes de guardar');
+                return;
+            }
+            
+            try {
+                // Aquí iría la llamada API para guardar el comentario
+                const user = authService.getCurrentUser();
+                const nuevoComentario = {
+                    fecha: new Date().toISOString(),
+                    texto: texto,
+                    usuario: user.nombre || user.usuario || 'Administrador'
+                };
+                
+                // Agregar al frontend
+                const container = document.getElementById('comentarios-container');
+                const comentarioHTML = `
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <p class="card-text mb-2">${texto}</p>
+                            <small class="text-muted">
+                                ${nuevoComentario.usuario} • 
+                                ${new Date().toLocaleDateString('es-MX', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                })}
+                            </small>
+                        </div>
+                    </div>
+                `;
+                
+                container.insertAdjacentHTML('afterbegin', comentarioHTML);
+                document.getElementById('nuevo-comentario').value = '';
+                
+                mostrarExito('Comentario guardado exitosamente');
+                
+            } catch (error) {
+                mostrarError('Error al guardar comentario: ' + error.message);
+            }
+        }
+        
+        function enviarNotificacion() {
+            if (!quejaActual) return;
+            alert(`Enviar notificación sobre queja ${quejaActual.quejaId} - En desarrollo`);
+        }
+        
+        function imprimirDetalle() {
+            window.print();
+        }
+        
+        function mostrarQuejaNoEncontrada() {
+            document.getElementById('loading').classList.add('d-none');
+            document.getElementById('queja-no-encontrada').classList.remove('d-none');
+        }
+        
+        function mostrarError(mensaje) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+        
+        function mostrarExito(mensaje) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

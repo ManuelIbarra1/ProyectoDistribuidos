@@ -6,102 +6,398 @@
     <title>PROFECO - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="css/style.css">
     <style>
-        .hidden { display: none !important; }
+        :root {
+            --profeco-blue: #1a237e;
+            --profeco-red: #d32f2f;
+            --profeco-light: #e8eaf6;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: none;
+            overflow: hidden;
+        }
+
+        .profeco-header {
+            background: linear-gradient(135deg, var(--profeco-blue) 0%, #283593 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+        }
+
+        .profeco-logo {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .btn-primary {
+            background: var(--profeco-blue);
+            border: none;
+            padding: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #0d1b6e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 35, 126, 0.3);
+        }
+
+        .form-control:focus {
+            border-color: var(--profeco-blue);
+            box-shadow: 0 0 0 0.25rem rgba(26, 35, 126, 0.25);
+        }
+
+        .info-box {
+            background: var(--profeco-light);
+            border-left: 4px solid var(--profeco-blue);
+            border-radius: 8px;
+        }
+
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .badge-consumidor {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .badge-profeco {
+            background-color: #d32f2f;
+            color: white;
+        }
+
+        .test-credentials {
+            border-left: 4px solid #4caf50;
+        }
+
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
     </style>
 </head>
 <body>
+    <!-- Container principal -->
     <div class="container">
-        <div class="row justify-content-center mt-5">
-            <div class="col-md-6 col-lg-4">
-                <div class="card login-card">
-                    <div class="card-header profeco-header text-center py-4">
-                        <h4 class="mb-0">
-                            <i class="bi bi-shield-check"></i> PROFECO
-                        </h4>
-                        <p class="mb-0">Sistema de Quejas en Línea</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="row">
+                    <!-- Tarjeta de Login -->
+                    <div class="col-md-6">
+                        <div class="card login-card h-100">
+                            <div class="card-header profeco-header">
+                                <div class="profeco-logo">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <h4 class="mb-1">PROFECO</h4>
+                                <p class="mb-0 opacity-75">Sistema de Quejas en Línea</p>
+                            </div>
+                            <div class="card-body p-4">
+                                <h5 class="mb-4">Iniciar Sesión</h5>
+
+                                <form id="login-form">
+                                    <div class="mb-3">
+                                        <label for="usuario" class="form-label">Correo o Usuario</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-person"></i>
+                                            </span>
+                                            <input type="text" class="form-control" id="usuario" 
+                                                   placeholder="usuario@email.com" required 
+                                                   value="maria@email.com">
+                                        </div>
+                                        <div class="form-text">Usa tu correo o nombre de usuario</div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="contrasena" class="form-label">Contraseña</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="bi bi-lock"></i>
+                                            </span>
+                                            <input type="password" class="form-control" id="contrasena" 
+                                                   placeholder="Contraseña" required 
+                                                   value="password123">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-3 mb-3">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
+                                    </button>
+
+                                    <div class="text-center">
+                                        <a href="register.html" class="text-decoration-none">
+                                            <i class="bi bi-person-plus me-1"></i> Crear nueva cuenta
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body p-4">
-                        <!-- Alert para errores -->
-                        <div id="login-alert" class="d-none"></div>
-                        
-                        <!-- Formulario de login -->
-                        <form id="login-form">
-                            <div class="mb-3">
-                                <label for="usuario" class="form-label">Usuario (Email)</label>
-                                <input type="email" class="form-control" id="usuario" 
-                                       placeholder="usuario@email.com" required 
-                                       value="admin@profeco.gob.mx">
+
+                    <!-- Panel de información -->
+                    <div class="col-md-6">
+                        <div class="h-100 d-flex flex-column">
+                            <!-- Alert container dinámico -->
+                            <div id="login-alert" class="alert-container"></div>
+
+                            <!-- Dashboard Preview -->
+                            <div class="info-box p-4 mb-3">
+                                <h6 class="mb-3">
+                                    <i class="bi bi-columns-gap me-2"></i> Dashboards por Rol
+                                </h6>
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <div class="card border-0 shadow-sm h-100">
+                                            <div class="card-body text-center">
+                                                <div class="mb-2">
+                                                    <i class="bi bi-person-circle fs-2 text-success"></i>
+                                                </div>
+                                                <h6>Consumidor</h6>
+                                                <small class="text-muted">Panel de usuario</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="card border-0 shadow-sm h-100">
+                                            <div class="card-body text-center">
+                                                <div class="mb-2">
+                                                    <i class="bi bi-shield-check fs-2 text-danger"></i>
+                                                </div>
+                                                <h6>PROFECO</h6>
+                                                <small class="text-muted">Panel administrativo</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <label for="contrasena" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="contrasena" 
-                                       placeholder="Contraseña" required 
-                                       value="admin123">
+
+                            <!-- Usuarios de prueba -->
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-header bg-white">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-key me-2"></i> Credenciales de Prueba
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Consumidor -->
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge badge-consumidor me-2">Consumidor</span>
+                                            <small class="text-muted">Dashboard personal</small>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small mb-1">Usuario/Correo:</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control" readonly value="maria@email.com">
+                                                <button class="btn btn-outline-secondary" onclick="copyToClipboard('maria@email.com')">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="form-label small mb-1">Contraseña:</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="password" class="form-control" readonly value="password123">
+                                                <button class="btn btn-outline-secondary" onclick="copyToClipboard('password123')">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- PROFECO -->
+                                    <div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge badge-profeco me-2">PROFECO</span>
+                                            <small class="text-muted">Panel administrativo</small>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label small mb-1">Usuario/Correo:</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control" readonly value="profeco@email.com">
+                                                <button class="btn btn-outline-secondary" onclick="copyToClipboard('profeco@email.com')">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="form-label small mb-1">Contraseña:</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="password" class="form-control" readonly value="admin123">
+                                                <button class="btn btn-outline-secondary" onclick="copyToClipboard('admin123')">
+                                                    <i class="bi bi-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100 py-2">
-                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                            </button>
-                            
-                            <div class="text-center mt-3">
-                                <a href="register.html" class="text-decoration-none">
-                                    ¿No tienes cuenta? Regístrate
-                                </a>
+
+                            <!-- Información del sistema -->
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="mb-3">
+                                        <i class="bi bi-info-circle me-2"></i> Información del Sistema
+                                    </h6>
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <i class="bi bi-check-circle text-success me-2"></i>
+                                            Login por rol (Consumidor/PROFECO)
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="bi bi-check-circle text-success me-2"></i>
+                                            Dashboards separados
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="bi bi-check-circle text-success me-2"></i>
+                                            API Gateway en puerto 8085
+                                        </li>
+                                        <li>
+                                            <i class="bi bi-check-circle text-success me-2"></i>
+                                            Autenticación JWT
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
-                        </form>
-                        
-                        <hr class="my-4">
-                        
-                        <div class="alert alert-info">
-                            <h6 class="alert-heading">Usuarios de prueba:</h6>
-                            <p class="mb-1"><strong>Consumidor:</strong> maria@email.com / password123</p>
-                            <p class="mb-0"><strong>PROFECO:</strong> admin@profeco.gob.mx / admin123</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Scripts en ORDEN CORRECTO -->
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Nuestros scripts - IMPORTANTE: RUTA RELATIVA CORRECTA -->
-    <script src="js/auth.js"></script>
-    <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
-    
+
     <script>
-        // Debug adicional
-        console.log('Scripts cargados, verificando authService...');
-        console.log('authService definido:', typeof authService !== 'undefined');
-        if (typeof authService !== 'undefined') {
-            console.log('authService:', authService);
+        // Función para copiar al portapapeles
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copiado al portapapeles');
+            });
         }
-    </script>
-    <script>
-    // Agrega esto al final del body, después de cargar auth.js
-    console.log('=== PRUEBA INICIAL ===');
-    
-    // Verificar servicios
-    setTimeout(() => {
-        console.log('1. Probando Gateway...');
-        fetch('http://localhost:8085/api/auth/health')
-            .then(r => {
-                console.log('Gateway status:', r.status);
-                return r.text();
-            })
-            .then(text => console.log('Gateway response:', text))
-            .catch(e => console.error('Gateway error:', e.message));
+
+        // Función para mostrar toasts
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
             
-        console.log('2. Verificando localStorage...');
-        console.log('Token:', localStorage.getItem('token'));
-        console.log('User:', localStorage.getItem('user'));
-    }, 1000);
-</script>
-    
+            const container = document.createElement('div');
+            container.className = 'position-fixed bottom-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            container.appendChild(toast);
+            document.body.appendChild(container);
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                container.remove();
+            });
+        }
+
+        // Manejo del login
+        document.getElementById('login-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const usuario = document.getElementById('usuario').value;
+            const contrasena = document.getElementById('contrasena').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+
+            // Estado de carga
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Autenticando...';
+            btn.disabled = true;
+
+            try {
+                if (typeof authService === 'undefined') {
+                    throw new Error('authService no está disponible');
+                }
+
+                await authService.login(usuario, contrasena);
+                
+                // Mostrar mensaje de éxito
+                showToast(`¡Bienvenido! Redirigiendo...`);
+
+            } catch (error) {
+                console.error('Login error:', error);
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                
+                // Mostrar error específico
+                if (error.message.includes('Failed to fetch')) {
+                    showToast('Error de conexión. Verifica el API Gateway.');
+                } else if (error.message.includes('401')) {
+                    showToast('Credenciales incorrectas. Usa las de prueba.');
+                }
+            }
+        });
+
+        // Redirigir si ya está autenticado
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('=== PROFECO - Login Page ===');
+            
+            // Verificar si viene del registro exitoso
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === 'true') {
+                const alertDiv = document.getElementById('login-alert');
+                if (alertDiv) {
+                    alertDiv.innerHTML = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <strong>¡Cuenta creada exitosamente!</strong> Ahora puedes iniciar sesión con tus credenciales.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Verificar si ya está autenticado
+            if (typeof authService !== 'undefined' && authService.isAuthenticated()) {
+                const user = authService.getCurrentUser();
+                if (user) {
+                    console.log('Usuario ya autenticado, redirigiendo...');
+                    
+                    // Redirigir según el rol
+                    if (authService.isConsumer()) {
+                        window.location.href = 'dashboard-consumidor.html';
+                    } else if (authService.isAdmin()) {
+                        window.location.href = 'dashboard-profeco.html';
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- Cargar auth.js -->
+    <script src="js/auth.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROFECO - Gestión de Quejas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <style>
+        :root {
+            --profeco-red: #d32f2f;
+            --profeco-red-dark: #b71c1c;
+        }
+        
+        .navbar-brand { font-weight: bold; color: var(--profeco-red) !important; }
+        .bg-profeco { background-color: var(--profeco-red) !important; }
+        .btn-profeco { background-color: var(--profeco-red); border-color: var(--profeco-red); color: white; }
+        .btn-profeco:hover { background-color: var(--profeco-red-dark); border-color: var(--profeco-red-dark); }
+        
+        .badge-recibida { background-color: #ffc107; color: black; }
+        .badge-proceso { background-color: #17a2b8; color: white; }
+        .badge-resuelta { background-color: #28a745; color: white; }
+        .badge-cerrada { background-color: #6c757d; color: white; }
+        
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(211, 47, 47, 0.05);
+        }
+        
+        .action-buttons .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-profeco shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard-profeco.html">
+                <i class="bi bi-shield-check me-2"></i>PROFECO - Gestión de Quejas
+            </a>
+            <div class="d-flex align-items-center">
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="adminDropdown" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-badge me-2"></i>
+                        <span id="admin-name-nav"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                        <li><a class="dropdown-item" href="dashboard-profeco.html">
+                            <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                        </a></li>
+                        <li><a class="dropdown-item" href="reportes.html">
+                            <i class="bi bi-bar-chart me-2"></i>Reportes
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Contenido Principal -->
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="mb-0">
+                    <i class="bi bi-clipboard-data me-2"></i>Gestión de Quejas
+                </h4>
+                <p class="text-muted mb-0">Administra todas las quejas del sistema</p>
+            </div>
+            <div>
+                <button class="btn btn-profeco me-2" onclick="exportarExcel()">
+                    <i class="bi bi-file-earmark-excel me-2"></i>Exportar Excel
+                </button>
+                <button class="btn btn-outline-danger" onclick="cargarQuejas()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Actualizar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Alertas -->
+        <div id="alert-container"></div>
+        
+        <!-- Filtros -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" id="filtro-estado">
+                            <option value="">Todos los estados</option>
+                            <option value="RECIBIDA">Pendiente</option>
+                            <option value="EN_PROCESO">En Proceso</option>
+                            <option value="RESUELTA">Resuelta</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Comercio</label>
+                        <input type="text" class="form-control" id="filtro-comercio" placeholder="Filtrar por comercio">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha desde</label>
+                        <input type="date" class="form-control" id="filtro-fecha-desde">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha hasta</label>
+                        <input type="date" class="form-control" id="filtro-fecha-hasta">
+                    </div>
+                </div>
+                <div class="mt-3 d-flex justify-content-between">
+                    <button class="btn btn-outline-secondary" onclick="limpiarFiltros()">
+                        <i class="bi bi-x-circle me-2"></i>Limpiar Filtros
+                    </button>
+                    <button class="btn btn-profeco" onclick="aplicarFiltros()">
+                        <i class="bi bi-funnel me-2"></i>Aplicar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de Quejas -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="quejas-table" class="table table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Folio</th>
+                                <th>Consumidor</th>
+                                <th>Comercio</th>
+                                <th>Fecha</th>
+                                <th>Estado</th>
+                                <th>Título</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quejas-tbody">
+                            <!-- Se llena dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Cambiar Estado -->
+    <div class="modal fade" id="estadoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cambiar Estado de Queja</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="queja-id-estado">
+                    <div class="mb-3">
+                        <label class="form-label">Estado Actual</label>
+                        <div id="estado-actual" class="form-control-plaintext"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nuevo Estado</label>
+                        <select class="form-select" id="nuevo-estado">
+                            <option value="RECIBIDA">Pendiente</option>
+                            <option value="EN_PROCESO">En Proceso</option>
+                            <option value="RESUELTA">Resuelta</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Comentario</label>
+                        <textarea class="form-control" id="comentario-estado" rows="3" 
+                                  placeholder="Agregar comentario sobre el cambio de estado"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-profeco" onclick="guardarCambioEstado()">Guardar Cambio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let dataTable;
+        let todasLasQuejas = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticación y rol
+            if (!window.authService || !window.authService.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            const user = authService.getCurrentUser();
+            if (!user || !authService.isAdmin()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Mostrar nombre del administrador
+            const displayName = user.nombre || user.usuario || user.correo || 'Administrador';
+            document.getElementById('admin-name-nav').textContent = displayName;
+            
+            // Inicializar DataTable
+            dataTable = $('#quejas-table').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-MX.json'
+                },
+                pageLength: 25,
+                order: [[3, 'desc']] // Ordenar por fecha descendente
+            });
+            
+            // Cargar quejas
+            cargarQuejas();
+            
+            // Configurar eventos de filtros
+            document.getElementById('filtro-estado').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtro-comercio').addEventListener('input', aplicarFiltros);
+        });
+        
+        async function cargarQuejas() {
+            try {
+                mostrarLoading(true);
+                
+                const response = await authService.authenticatedFetch('/api/quejas');
+                
+                if (response && response.quejas) {
+                    todasLasQuejas = response.quejas;
+                    mostrarQuejasEnTabla(todasLasQuejas);
+                    mostrarExito(`Se cargaron ${todasLasQuejas.length} quejas`);
+                } else {
+                    throw new Error('Formato de respuesta inválido');
+                }
+                
+            } catch (error) {
+                console.error('Error cargando quejas:', error);
+                mostrarError('No se pudieron cargar las quejas: ' + error.message);
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+        
+        function mostrarQuejasEnTabla(quejas) {
+            dataTable.clear();
+            
+            quejas.forEach(queja => {
+                const fecha = new Date(queja.fecha).toLocaleDateString('es-MX');
+                const estadoBadge = crearBadgeEstado(queja.estado);
+                
+                dataTable.row.add([
+                    `<strong>${queja.quejaId || 'N/A'}</strong>`,
+                    queja.usuario || 'N/A',
+                    queja.comercio || 'N/A',
+                    fecha,
+                    estadoBadge,
+                    queja.titulo?.substring(0, 50) + (queja.titulo?.length > 50 ? '...' : '') || 'Sin título',
+                    crearBotonesAccion(queja)
+                ]);
+            });
+            
+            dataTable.draw();
+        }
+        
+        function crearBadgeEstado(estado) {
+            const estadoClass = {
+                'RECIBIDA': 'badge-recibida',
+                'EN_PROCESO': 'badge-proceso', 
+                'RESUELTA': 'badge-resuelta'
+            }[estado] || 'badge-cerrada';
+            
+            const estadoText = {
+                'RECIBIDA': 'Pendiente',
+                'EN_PROCESO': 'En Proceso',
+                'RESUELTA': 'Resuelta'
+            }[estado] || estado || 'Desconocido';
+            
+            return `<span class="badge ${estadoClass}">${estadoText}</span>`;
+        }
+        
+        function crearBotonesAccion(queja) {
+            return `
+                <div class="action-buttons">
+                    <button class="btn btn-sm btn-outline-primary" onclick="verDetalle('${queja.quejaId}')" 
+                            title="Ver detalles">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning ms-1" onclick="cambiarEstado('${queja.quejaId}', '${queja.estado}')"
+                            title="Cambiar estado">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-success ms-1" onclick="asignarQueja('${queja.quejaId}')"
+                            title="Asignar a agente">
+                        <i class="bi bi-person-plus"></i>
+                    </button>
+                </div>
+            `;
+        }
+        
+        function aplicarFiltros() {
+            const estado = document.getElementById('filtro-estado').value;
+            const comercio = document.getElementById('filtro-comercio').value.toLowerCase();
+            const fechaDesde = document.getElementById('filtro-fecha-desde').value;
+            const fechaHasta = document.getElementById('filtro-fecha-hasta').value;
+            
+            let quejasFiltradas = todasLasQuejas;
+            
+            if (estado) {
+                quejasFiltradas = quejasFiltradas.filter(q => q.estado === estado);
+            }
+            
+            if (comercio) {
+                quejasFiltradas = quejasFiltradas.filter(q => 
+                    q.comercio && q.comercio.toLowerCase().includes(comercio)
+                );
+            }
+            
+            if (fechaDesde) {
+                const desde = new Date(fechaDesde);
+                quejasFiltradas = quejasFiltradas.filter(q => 
+                    new Date(q.fecha) >= desde
+                );
+            }
+            
+            if (fechaHasta) {
+                const hasta = new Date(fechaHasta);
+                hasta.setHours(23, 59, 59, 999);
+                quejasFiltradas = quejasFiltradas.filter(q => 
+                    new Date(q.fecha) <= hasta
+                );
+            }
+            
+            mostrarQuejasEnTabla(quejasFiltradas);
+        }
+        
+        function limpiarFiltros() {
+            document.getElementById('filtro-estado').value = '';
+            document.getElementById('filtro-comercio').value = '';
+            document.getElementById('filtro-fecha-desde').value = '';
+            document.getElementById('filtro-fecha-hasta').value = '';
+            mostrarQuejasEnTabla(todasLasQuejas);
+        }
+        
+        function verDetalle(quejaId) {
+            window.location.href = `detalle-queja.html?id=${quejaId}`;
+        }
+        
+        function cambiarEstado(quejaId, estadoActual) {
+            document.getElementById('queja-id-estado').value = quejaId;
+            document.getElementById('estado-actual').textContent = 
+                {'RECIBIDA': 'Pendiente', 'EN_PROCESO': 'En Proceso', 'RESUELTA': 'Resuelta'}[estadoActual] || estadoActual;
+            
+            const modal = new bootstrap.Modal(document.getElementById('estadoModal'));
+            modal.show();
+        }
+        
+        async function guardarCambioEstado() {
+            const quejaId = document.getElementById('queja-id-estado').value;
+            const nuevoEstado = document.getElementById('nuevo-estado').value;
+            const comentario = document.getElementById('comentario-estado').value;
+            
+            try {
+                // Aquí iría la llamada API para actualizar el estado
+                // Por ahora solo actualizamos en el frontend
+                const quejaIndex = todasLasQuejas.findIndex(q => q.quejaId === quejaId);
+                if (quejaIndex !== -1) {
+                    todasLasQuejas[quejaIndex].estado = nuevoEstado;
+                    mostrarQuejasEnTabla(todasLasQuejas);
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('estadoModal'));
+                    modal.hide();
+                    
+                    mostrarExito(`Estado de queja ${quejaId} actualizado a ${nuevoEstado}`);
+                }
+            } catch (error) {
+                mostrarError('Error al actualizar estado: ' + error.message);
+            }
+        }
+        
+        function asignarQueja(quejaId) {
+            // Por implementar: asignar queja a un agente específico
+            alert(`Funcionalidad de asignación para queja ${quejaId} - En desarrollo`);
+        }
+        
+        function exportarExcel() {
+            if (todasLasQuejas.length === 0) {
+                mostrarError('No hay quejas para exportar');
+                return;
+            }
+            
+            // Crear contenido CSV
+            let csv = 'Folio,Consumidor,Comercio,Fecha,Estado,Título,Descripción\n';
+            
+            todasLasQuejas.forEach(queja => {
+                const fecha = new Date(queja.fecha).toLocaleDateString();
+                const descripcion = (queja.descripcion || '').replace(/"/g, '""').replace(/\n/g, ' ');
+                
+                csv += `"${queja.quejaId || ''}","${queja.usuario || ''}","${queja.comercio || ''}",`;
+                csv += `"${fecha}","${queja.estado || ''}","${queja.titulo || ''}","${descripcion}"\n`;
+            });
+            
+            // Descargar archivo
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `quejas-profeco-${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            mostrarExito('Reporte exportado exitosamente');
+        }
+        
+        function mostrarLoading(mostrar) {
+            // Implementar spinner de carga
+        }
+        
+        function mostrarError(mensaje) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+        
+        function mostrarExito(mensaje) {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>${mensaje}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+        
+        function logout() {
+            if (confirm('¿Estás seguro de cerrar sesión?')) {
+                window.authService.logout();
+            }
+        }
+    </script>
+</body>
+</html>

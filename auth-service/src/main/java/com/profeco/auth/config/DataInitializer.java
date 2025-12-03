@@ -32,8 +32,8 @@ public class DataInitializer implements CommandLineRunner {
             );
             
             Usuario profeco = new Usuario(
-                "profeco", 
-                passwordUtil.hashPassword("abcd"), 
+                "profeco@email.com", 
+                passwordUtil.hashPassword("admin123"), 
                 "profeco"
             );
             
@@ -42,7 +42,7 @@ public class DataInitializer implements CommandLineRunner {
             
             System.out.println("✅ Usuarios por defecto creados:");
             System.out.println("   👤 maria@email.com / password123");
-            System.out.println("   🔧 profeco / abcd");
+            System.out.println("   🔧 profeco@email.com / admin123");
         }
     }
 }

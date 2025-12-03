@@ -17,7 +17,7 @@ import io.jsonwebtoken.Jwts;
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
-    private final String SECRET = "MI_SUPER_CLAVE_SECRETA_DE_256_BITS_QUE_NO_CAMBIA";
+    private final String SECRET = "MI_CLAVE_SECRETA_MUY_SEGURA_PARA_PROFECO_2024";
 
     public JwtAuthenticationFilter() {
         super(Config.class);
