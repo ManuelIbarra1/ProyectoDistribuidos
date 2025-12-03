@@ -22,7 +22,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
     
-    @Autowired  // ← AÑADIR ESTA INYECCIÓN
+    @Autowired
     private JwtUtil jwtUtil;
     
     @GetMapping("/test")
@@ -40,7 +40,7 @@ public class AuthController {
         return Map.of("status", "UP", "service", "auth-service");
     }
     
-    // Método nuevo corregido
+    
     @GetMapping("/usuario")
     public ResponseEntity<?> obtenerUsuario(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -50,7 +50,7 @@ public class AuthController {
             
             String token = authHeader.substring(7);
             
-            // Usar jwtUtil inyectado
+            
             String username = jwtUtil.obtenerUsername(token);
             String rol = jwtUtil.obtenerRol(token);
             
@@ -124,9 +124,9 @@ public class AuthController {
             response.put("valido", esValido);
             
             if (esValido) {
-                // Corregir estos dos campos
-                String username = jwtUtil.obtenerUsername(token); // ← Usar jwtUtil aquí también
-                String rol = jwtUtil.obtenerRol(token); // ← Y aquí
+                
+                String username = jwtUtil.obtenerUsername(token); //
+                String rol = jwtUtil.obtenerRol(token); //
                 response.put("usuario", username);
                 response.put("rol", rol);
             }

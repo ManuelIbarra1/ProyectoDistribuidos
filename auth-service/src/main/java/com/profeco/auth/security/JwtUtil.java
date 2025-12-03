@@ -14,7 +14,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
     
-    @Value("${jwt.secret:MI_CLAVE_SECRETA_MUY_SEGURA_PARA_PROFECO_2024}")
+    @Value("${jwt.secret:MI_CLAVE_SECRETA_MUY_SEGURA_PARA_PROFECO_2025}")
     private String secret;
     
     @Value("${jwt.expiration:7200000}") // 2 horas

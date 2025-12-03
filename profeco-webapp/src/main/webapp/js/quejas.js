@@ -7,7 +7,7 @@ if (typeof window.quejasService === 'undefined') {
         baseUrl: 'http://localhost:8085',
         
         async crearQueja(titulo, descripcion, comercio) {
-            console.log('📝 Creando nueva queja...');
+            console.log(' Creando nueva queja...');
             
             const url = `${this.baseUrl}/api/quejas`;
             
@@ -31,11 +31,11 @@ if (typeof window.quejasService === 'undefined') {
                     })
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('❌ Error creando queja:', errorText);
+                    console.error(' Error creando queja:', errorText);
                     
                     try {
                         const errorJson = JSON.parse(errorText);
@@ -46,17 +46,17 @@ if (typeof window.quejasService === 'undefined') {
                 }
                 
                 const data = await response.json();
-                console.log('✅ Queja creada exitosamente:', data);
+                console.log(' Queja creada exitosamente:', data);
                 return data;
                 
             } catch (error) {
-                console.error('💥 Error completo:', error);
+                console.error(' Error completo:', error);
                 throw error;
             }
         },
         
         async obtenerMisQuejas() {
-            console.log('📋 Obteniendo mis quejas...');
+            console.log(' Obteniendo mis quejas...');
             
             const url = `${this.baseUrl}/api/quejas/mis-quejas`;
             
@@ -74,26 +74,26 @@ if (typeof window.quejasService === 'undefined') {
                     }
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('❌ Error obteniendo quejas:', errorText);
+                    console.error(' Error obteniendo quejas:', errorText);
                     throw new Error(`Error ${response.status}: ${errorText}`);
                 }
                 
                 const data = await response.json();
-                console.log(`✅ ${data.total} quejas obtenidas`);
+                console.log(` ${data.total} quejas obtenidas`);
                 return data.quejas || [];
                 
             } catch (error) {
-                console.error('💥 Error obteniendo quejas:', error);
+                console.error(' Error obteniendo quejas:', error);
                 throw error;
             }
         },
         
         async obtenerTodasLasQuejas() {
-            console.log('👁️ Obteniendo todas las quejas...');
+            console.log('️ Obteniendo todas las quejas...');
             
             const url = `${this.baseUrl}/api/quejas`;
             
@@ -111,26 +111,26 @@ if (typeof window.quejasService === 'undefined') {
                     }
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('❌ Error obteniendo todas las quejas:', errorText);
+                    console.error(' Error obteniendo todas las quejas:', errorText);
                     throw new Error(`Error ${response.status}: ${errorText}`);
                 }
                 
                 const data = await response.json();
-                console.log(`✅ ${data.total} quejas obtenidas (todas)`);
+                console.log(` ${data.total} quejas obtenidas (todas)`);
                 return data.quejas || [];
                 
             } catch (error) {
-                console.error('💥 Error obteniendo todas las quejas:', error);
+                console.error(' Error obteniendo todas las quejas:', error);
                 throw error;
             }
         },
         
         async obtenerQuejaPorId(quejaId) {
-            console.log(`🔍 Obteniendo queja ID: ${quejaId}`);
+            console.log(` Obteniendo queja ID: ${quejaId}`);
             
             const url = `${this.baseUrl}/api/quejas/${quejaId}`;
             
@@ -148,7 +148,7 @@ if (typeof window.quejasService === 'undefined') {
                     }
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 if (!response.ok) {
                     if (response.status === 404) {
@@ -159,17 +159,17 @@ if (typeof window.quejasService === 'undefined') {
                 }
                 
                 const queja = await response.json();
-                console.log('✅ Queja obtenida:', queja.quejaId);
+                console.log(' Queja obtenida:', queja.quejaId);
                 return queja;
                 
             } catch (error) {
-                console.error('💥 Error obteniendo queja:', error);
+                console.error(' Error obteniendo queja:', error);
                 throw error;
             }
         },
         
         async obtenerEstadisticasResumen() {
-            console.log('📊 Obteniendo estadísticas...');
+            console.log(' Obteniendo estadísticas...');
             
             const url = `${this.baseUrl}/api/quejas/estadisticas/resumen`;
             
@@ -187,26 +187,26 @@ if (typeof window.quejasService === 'undefined') {
                     }
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('❌ Error obteniendo estadísticas:', errorText);
+                    console.error(' Error obteniendo estadísticas:', errorText);
                     throw new Error(`Error ${response.status}: ${errorText}`);
                 }
                 
                 const data = await response.json();
-                console.log('✅ Estadísticas obtenidas:', data);
+                console.log(' Estadísticas obtenidas:', data);
                 return data;
                 
             } catch (error) {
-                console.error('💥 Error obteniendo estadísticas:', error);
+                console.error(' Error obteniendo estadísticas:', error);
                 throw error;
             }
         },
         
         async obtenerQuejasPorUsuario(usuario) {
-            console.log(`👤 Obteniendo quejas de usuario: ${usuario}`);
+            console.log(` Obteniendo quejas de usuario: ${usuario}`);
             
             const url = `${this.baseUrl}/api/quejas/usuario/${encodeURIComponent(usuario)}`;
             
@@ -224,26 +224,26 @@ if (typeof window.quejasService === 'undefined') {
                     }
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('❌ Error obteniendo quejas de usuario:', errorText);
+                    console.error(' Error obteniendo quejas de usuario:', errorText);
                     throw new Error(`Error ${response.status}: ${errorText}`);
                 }
                 
                 const data = await response.json();
-                console.log(`✅ ${data.total} quejas obtenidas para ${usuario}`);
+                console.log(` ${data.total} quejas obtenidas para ${usuario}`);
                 return data.quejas || [];
                 
             } catch (error) {
-                console.error('💥 Error obteniendo quejas de usuario:', error);
+                console.error(' Error obteniendo quejas de usuario:', error);
                 throw error;
             }
         }
     };
     
-    console.log('✅ quejasService creado exitosamente');
+    console.log(' quejasService creado exitosamente');
 } else {
     console.log('ℹ️ quejasService ya estaba definido');
 }

@@ -419,7 +419,7 @@
                                             quejaData.monto = parseFloat(monto);
                                         }
 
-                                        console.log('📤 Datos de la queja:', quejaData);
+                                        console.log(' Datos de la queja:', quejaData);
 
                                         // Deshabilitar botón y mostrar estado de carga
                                         const originalText = submitBtn.innerHTML;
@@ -433,7 +433,7 @@
                                                 body: JSON.stringify(quejaData)
                                             });
 
-                                            console.log('✅ Queja creada exitosamente:', response);
+                                            console.log(' Queja creada exitosamente:', response);
 
                                             // Mostrar mensaje de éxito
                                             showAlert(`
@@ -452,7 +452,7 @@
                                             }, 5000);
 
                                         } catch (error) {
-                                            console.error('❌ Error al crear queja:', error);
+                                            console.error(' Error al crear queja:', error);
 
                                             let errorMessage = 'Error al crear la queja. ';
                                             if (error.message.includes('401')) {

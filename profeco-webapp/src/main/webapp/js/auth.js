@@ -9,7 +9,7 @@ if (typeof window.authService === 'undefined') {
         
         // ========== MÉTODO REGISTRAR ==========
         async registrar(usuario, contrasena, rol = 'consumidor') {
-            console.log('📝 Registrando usuario...');
+            console.log(' Registrando usuario...');
             
             const url = `${this.baseUrl}/api/auth/registro`;
             
@@ -19,7 +19,7 @@ if (typeof window.authService === 'undefined') {
                 rol: rol.trim()
             };
             
-            console.log('📤 Enviando:', registroData);
+            console.log(' Enviando:', registroData);
             
             try {
                 const response = await fetch(url, {
@@ -32,10 +32,10 @@ if (typeof window.authService === 'undefined') {
                     body: JSON.stringify(registroData)
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 const responseText = await response.text();
-                console.log('📥 Response body:', responseText);
+                console.log(' Response body:', responseText);
                 
                 if (!response.ok) {
                     let errorMessage = `Error ${response.status}`;
@@ -55,25 +55,25 @@ if (typeof window.authService === 'undefined') {
                     data = { mensaje: 'Registro exitoso' };
                 }
                 
-                console.log('✅ Registro exitoso:', data);
+                console.log(' Registro exitoso:', data);
                 return data;
                 
             } catch (error) {
-                console.error('💥 Error en registro:', error);
+                console.error(' Error en registro:', error);
                 throw error;
             }
         },
         
         // ========== MÉTODO LOGIN ==========
         async login(usuario, contrasena) {
-            console.log('🔐 Login para:', usuario);
+            console.log(' Login para:', usuario);
             
             const loginData = {
                 usuario: usuario.trim(),
                 contrasena: contrasena.trim()
             };
             
-            console.log('📤 Datos de login:', loginData);
+            console.log(' Datos de login:', loginData);
             
             const url = `${this.baseUrl}/api/auth/login`;
             
@@ -88,11 +88,11 @@ if (typeof window.authService === 'undefined') {
                     body: JSON.stringify(loginData)
                 });
                 
-                console.log('📥 Response status:', response.status);
+                console.log(' Response status:', response.status);
                 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('❌ Error login:', errorText);
+                    console.error(' Error login:', errorText);
                     
                     let errorMessage;
                     try {
@@ -105,27 +105,27 @@ if (typeof window.authService === 'undefined') {
                 }
                 
                 const data = await response.json();
-                console.log('✅ Login exitoso!', data);
+                console.log(' Login exitoso!', data);
                 
                 // ⭐⭐⭐ ESTA ES LA LÍNEA CRÍTICA QUE TE FALTA ⭐⭐⭐
                 return this.handleSuccessfulLogin(data, usuario);
                 
             } catch (error) {
-                console.error('💥 Error en login:', error);
+                console.error(' Error en login:', error);
                 throw error;
             }
         },
         
         // ========== MANEJO DE LOGIN EXITOSO ==========
         handleSuccessfulLogin(data, usuarioOriginal) {
-            console.log('🎯 Procesando login exitoso...');
+            console.log(' Procesando login exitoso...');
             
             if (data.token) {
                 // Extraer información del usuario
                 let userRol = data.rol || 'consumidor';
                 let userNombre = data.usuario || usuarioOriginal;
                 
-                console.log('👤 Información del usuario:');
+                console.log(' Información del usuario:');
                 console.log('  - Rol:', userRol);
                 console.log('  - Nombre:', userNombre);
                 console.log('  - Token recibido:', data.token ? 'Sí (' + data.token.length + ' chars)' : 'No');
@@ -144,21 +144,21 @@ if (typeof window.authService === 'undefined') {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(userData));
                 
-                console.log('💾 Datos guardados en localStorage');
+                console.log(' Datos guardados en localStorage');
                 
                 // ⭐⭐⭐ REDIRIGIR SEGÚN EL ROL ⭐⭐⭐
                 this.redirectByRole(userRol);
                 
                 return data;
             } else {
-                console.error('❌ No se recibió token en la respuesta');
+                console.error(' No se recibió token en la respuesta');
                 throw new Error('No se recibió token de autenticación');
             }
         },
         
         // ========== REDIRECCIÓN POR ROL ==========
         redirectByRole(role) {
-            console.log('🔄 Redirigiendo por rol:', role);
+            console.log(' Redirigiendo por rol:', role);
             
             // Normalizar el rol (minúsculas, sin espacios)
             const roleNormalized = (role || '').toLowerCase().trim();
@@ -179,19 +179,19 @@ if (typeof window.authService === 'undefined') {
                 console.warn(`⚠️ Rol no reconocido: "${role}", usando dashboard por defecto`);
             }
             
-            console.log(`🎯 Redirigiendo a: ${redirectUrl}`);
-            console.log('⏱️ Esperando 1 segundo antes de redirigir...');
+            console.log(` Redirigiendo a: ${redirectUrl}`);
+            console.log('️ Esperando 1 segundo antes de redirigir...');
             
             // Redirigir después de 1 segundo (para ver mensajes)
             setTimeout(() => {
-                console.log('🚀 Redirigiendo ahora...');
+                console.log(' Redirigiendo ahora...');
                 window.location.href = redirectUrl;
             }, 1000);
         },
         
         // ========== UTILIDADES ==========
         logout() {
-            console.log('🚪 Cerrando sesión...');
+            console.log(' Cerrando sesión...');
             localStorage.clear();
             window.location.href = 'login.html';
         },
@@ -199,7 +199,7 @@ if (typeof window.authService === 'undefined') {
         isAuthenticated() {
             const token = localStorage.getItem('token');
             if (!token) {
-                console.log('❌ No hay token en localStorage');
+                console.log(' No hay token en localStorage');
                 return false;
             }
             
@@ -306,7 +306,7 @@ if (typeof window.authService === 'undefined') {
         }
     };
     
-    console.log('✅ authService creado con redirección por rol');
+    console.log(' authService creado con redirección por rol');
 }
 
 console.log('authService disponible:', typeof window.authService !== 'undefined');

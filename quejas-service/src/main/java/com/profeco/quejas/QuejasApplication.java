@@ -14,9 +14,8 @@ public class QuejasApplication {
         .properties(
             "server.port=8082",
             "spring.datasource.url=jdbc:h2:mem:quejasdb",
-            "spring.rabbitmq.host=localhost",
-            // ✅ CORRECTO: Solo base URL del Gateway
-            "auth.service.url=http://localhost:8085"  // ← SIN /api/auth
+            "spring.rabbitmq.host=localhost",        
+            "auth.service.url=http://localhost:8085" 
         )
         .run(args);
 }

@@ -40,8 +40,7 @@ public class GatewayApplication {
             .build();
     }
     
-    // ⭐⭐⭐ FILTRO CORS SUPER PERMISIVO (SOLO DESARROLLO) ⭐⭐⭐
-    // En GatewayApplication.java - YA LO TIENES BIEN
+    
 @Bean
 public WebFilter corsFilter() {
     return (ServerWebExchange ctx, WebFilterChain chain) -> {

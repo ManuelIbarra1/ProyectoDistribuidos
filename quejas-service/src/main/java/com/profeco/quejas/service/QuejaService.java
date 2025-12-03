@@ -30,7 +30,7 @@ public class QuejaService {
 
     public Queja crearQueja(Queja queja, String token) {
         System.out.println("=".repeat(60));
-        System.out.println("📝 [QuejaService] Iniciando creación de queja");
+        System.out.println(" [QuejaService] Iniciando creación de queja");
 
         // 1. Validar token
         if (!authService.validarToken(token)) {
@@ -39,7 +39,7 @@ public class QuejaService {
 
         // 2. Obtener usuario REAL del token (IMPORTANTE: evita spoofing)
         String usuarioReal = authService.obtenerUsuarioDesdeToken(token);
-        System.out.println("👤 Usuario obtenido del token: '" + usuarioReal + "'");
+        System.out.println(" Usuario obtenido del token: '" + usuarioReal + "'");
 
         if (usuarioReal == null || usuarioReal.isEmpty()) {
             throw new RuntimeException("No se pudo obtener usuario del token");
@@ -47,17 +47,17 @@ public class QuejaService {
 
         // 3. Asignar usuario REAL (sobrescribe cualquier usuario en la queja)
         queja.setUsuario(usuarioReal);
-        System.out.println("✅ Usuario asignado a queja: " + usuarioReal);
+        System.out.println(" Usuario asignado a queja: " + usuarioReal);
 
         // 4. Validar que sea consumidor
         String rol = authService.obtenerRolDesdeToken(token);
-        System.out.println("🎭 Rol obtenido: '" + rol + "'");
+        System.out.println(" Rol obtenido: '" + rol + "'");
 
         if (!"consumidor".equals(rol)) {
             throw new RuntimeException("Solo los consumidores pueden crear quejas");
         }
 
-        System.out.println("✅ Usuario es consumidor - autorizado");
+        System.out.println(" Usuario es consumidor - autorizado");
 
         // 5. Validar campos requeridos
         if (queja.getTitulo() == null || queja.getTitulo().trim().isEmpty()) {
@@ -73,85 +73,85 @@ public class QuejaService {
         }
 
         // 6. Guardar queja
-        System.out.println("💾 Guardando queja en base de datos...");
+        System.out.println(" Guardando queja en base de datos...");
         Queja quejaGuardada = quejaRepository.save(queja);
-        System.out.println("✅ Queja guardada con ID: " + quejaGuardada.getQuejaId());
+        System.out.println(" Queja guardada con ID: " + quejaGuardada.getQuejaId());
 
         // 7. Enviar notificación a RabbitMQ
         try {
-            System.out.println("🐇 Enviando notificación a RabbitMQ...");
+            System.out.println(" Enviando notificación a RabbitMQ...");
             enviarNotificacionRabbitMQ(quejaGuardada);
-            System.out.println("✅ Notificación enviada a RabbitMQ");
+            System.out.println(" Notificación enviada a RabbitMQ");
         } catch (Exception e) {
-            System.err.println("⚠️  Error enviando a RabbitMQ: " + e.getMessage());
-            // No lanzamos excepción, solo registramos el error
+            System.err.println("️  Error enviando a RabbitMQ: " + e.getMessage());
+            
         }
 
-        System.out.println("🎉 Queja creada exitosamente");
+        System.out.println(" Queja creada exitosamente");
         System.out.println("=".repeat(60));
         return quejaGuardada;
     }
 
     public List<Queja> obtenerTodasLasQuejas(String token) {
         System.out.println("=".repeat(60));
-        System.out.println("🔍 [QuejaService] Obteniendo todas las quejas");
+        System.out.println(" [QuejaService] Obteniendo todas las quejas");
 
         // Validar que sea PROFECO
         String rol = authService.obtenerRolDesdeToken(token);
-        System.out.println("🎭 Rol obtenido: '" + rol + "'");
+        System.out.println(" Rol obtenido: '" + rol + "'");
 
         if (rol == null || !"profeco".equals(rol)) {
-            System.out.println("❌ ERROR: Acceso denegado. Rol: " + rol);
+            System.out.println(" ERROR: Acceso denegado. Rol: " + rol);
             throw new RuntimeException("Solo PROFECO puede ver todas las quejas");
         }
 
-        System.out.println("✅ Acceso autorizado para PROFECO");
+        System.out.println(" Acceso autorizado para PROFECO");
         List<Queja> quejas = quejaRepository.findAllByOrderByFechaDesc();
-        System.out.println("📊 Total de quejas encontradas: " + quejas.size());
+        System.out.println(" Total de quejas encontradas: " + quejas.size());
         System.out.println("=".repeat(60));
         return quejas;
     }
 
     public List<Queja> obtenerQuejasPorUsuario(String usuario, String token) {
         System.out.println("=".repeat(60));
-        System.out.println("🔍 [QuejaService] Obteniendo quejas para usuario: " + usuario);
+        System.out.println(" [QuejaService] Obteniendo quejas para usuario: " + usuario);
 
         // Validar que el token pertenezca al usuario
         String rol = authService.obtenerRolDesdeToken(token);
-        System.out.println("🎭 Rol obtenido: '" + rol + "'");
+        System.out.println(" Rol obtenido: '" + rol + "'");
 
         if (rol == null) {
-            System.out.println("❌ ERROR: Token inválido");
+            System.out.println(" ERROR: Token inválido");
             throw new RuntimeException("Token inválido");
         }
 
         // PROFECO puede ver todas, consumidores solo las suyas
         List<Queja> quejas;
         if ("profeco".equals(rol)) {
-            System.out.println("✅ Usuario es PROFECO - mostrando todas las quejas");
+            System.out.println(" Usuario es PROFECO - mostrando todas las quejas");
             quejas = quejaRepository.findAllByOrderByFechaDesc();
         } else {
-            System.out.println("✅ Usuario es CONSUMIDOR - mostrando solo sus quejas");
+            System.out.println(" Usuario es CONSUMIDOR - mostrando solo sus quejas");
             quejas = quejaRepository.findByUsuarioOrderByFechaDesc(usuario);
         }
 
-        System.out.println("📊 Quejas encontradas: " + quejas.size());
+        System.out.println(" Quejas encontradas: " + quejas.size());
         System.out.println("=".repeat(60));
         return quejas;
     }
 
     public Optional<Queja> obtenerQuejaPorId(String quejaId, String token) {
         System.out.println("=".repeat(60));
-        System.out.println("🔍 [QuejaService] Obteniendo queja por ID: " + quejaId);
+        System.out.println(" [QuejaService] Obteniendo queja por ID: " + quejaId);
 
         if (!authService.validarToken(token)) {
-            System.out.println("❌ ERROR: Token inválido");
+            System.out.println(" ERROR: Token inválido");
             throw new RuntimeException("Token inválido");
         }
 
-        System.out.println("✅ Token validado");
+        System.out.println(" Token validado");
         Optional<Queja> queja = quejaRepository.findByQuejaId(quejaId);
-        System.out.println("📊 Queja encontrada: " + queja.isPresent());
+        System.out.println(" Queja encontrada: " + queja.isPresent());
         System.out.println("=".repeat(60));
         return queja;
     }
@@ -168,13 +168,13 @@ public class QuejaService {
             notificacion.put("fecha", queja.getFecha() != null ? queja.getFecha().toString() : LocalDateTime.now().toString());
             notificacion.put("mensaje", "Nueva queja registrada en el sistema");
 
-            // Agregar los campos que Notification Service espera
-            notificacion.put("destinatario", "profeco@notificaciones.gob.mx");  // Email de PROFECO
+            
+            notificacion.put("destinatario", "profeco@notificaciones.gob.mx");
             notificacion.put("asunto", "Nueva Queja Registrada - " + queja.getQuejaId());
             notificacion.put("timestamp", LocalDateTime.now().toString());
 
-            System.out.println("🐇 Enviando notificación COMPLETA a RabbitMQ...");
-            System.out.println("📨 Contenido: " + notificacion);
+            System.out.println(" Enviando notificación COMPLETA a RabbitMQ...");
+            System.out.println(" Contenido: " + notificacion);
 
             rabbitTemplate.convertAndSend(
                     RabbitConfig.QUEUE_NOTIFICACIONES,
@@ -182,13 +182,13 @@ public class QuejaService {
             );
 
         } catch (Exception e) {
-            System.err.println("❌ Error enviando notificación: " + e.getMessage());
+            System.err.println(" Error enviando notificación: " + e.getMessage());
         }
     }
 
     public long obtenerTotalQuejas() {
         long total = quejaRepository.count();
-        System.out.println("📊 [QuejaService] Total de quejas en sistema: " + total);
+        System.out.println(" [QuejaService] Total de quejas en sistema: " + total);
         return total;
     }
 

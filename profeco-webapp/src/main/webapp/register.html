@@ -405,10 +405,10 @@
             if (confirm.length === 0) {
                 matchText.textContent = '';
             } else if (password === confirm) {
-                matchText.textContent = '✅ Las contraseñas coinciden';
+                matchText.textContent = ' Las contraseñas coinciden';
                 matchText.style.color = '#28a745';
             } else {
-                matchText.textContent = '❌ Las contraseñas no coinciden';
+                matchText.textContent = ' Las contraseñas no coinciden';
                 matchText.style.color = '#dc3545';
             }
         }
@@ -470,7 +470,7 @@
             btn.disabled = true;
             
             try {
-                console.log('📤 Registrando con:', { usuario, rol });
+                console.log(' Registrando con:', { usuario, rol });
                 
                 // Verificar si authService está disponible
                 if (typeof authService === 'undefined') {
@@ -481,7 +481,7 @@
                 const result = await authService.registrar(usuario, password, rol);
                 
                 // Registro exitoso
-                showAlert(`✅ Cuenta creada exitosamente para: ${usuario}<br>Ahora puedes iniciar sesión`, 'success');
+                showAlert(` Cuenta creada exitosamente para: ${usuario}<br>Ahora puedes iniciar sesión`, 'success');
                 
                 // Redirigir después de 3 segundos
                 setTimeout(() => {
@@ -490,7 +490,7 @@
                 
             } catch (error) {
                 console.error('Error en registro:', error);
-                showAlert(`❌ ${error.message}`, 'danger');
+                showAlert(` ${error.message}`, 'danger');
                 
                 // Restaurar botón
                 btn.innerHTML = originalText;
@@ -526,7 +526,7 @@
                 ];
                 
                 let results = [];
-                let message = '<strong>🔍 Resultados de conexión:</strong><br><br>';
+                let message = '<strong> Resultados de conexión:</strong><br><br>';
                 
                 for (const test of tests) {
                     try {
@@ -536,12 +536,12 @@
                         });
                         
                         if (response.ok) {
-                            results.push(`✅ ${test.name}: ${response.status} OK`);
+                            results.push(` ${test.name}: ${response.status} OK`);
                         } else {
-                            results.push(`❌ ${test.name}: ${response.status}`);
+                            results.push(` ${test.name}: ${response.status}`);
                         }
                     } catch (error) {
-                        results.push(`❌ ${test.name}: ${error.message}`);
+                        results.push(` ${test.name}: ${error.message}`);
                     }
                 }
                 

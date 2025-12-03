@@ -362,17 +362,17 @@
                 const user = authService.getCurrentUser();
                 const usuario = user.usuario || user.correo;
                 
-                console.log('👤 Usuario actual:', usuario);
+                console.log(' Usuario actual:', usuario);
                 
                 // Obtener quejas del usuario
                 const response = await authService.authenticatedFetch(`/api/quejas`);
                 
-                console.log('📥 Respuesta del backend:', response);
+                console.log(' Respuesta del backend:', response);
                 
                 if (response && response.quejas) {
                     // Filtrar solo las quejas del usuario actual
                     const quejasUsuario = response.quejas.filter(q => q.usuario === usuario);
-                    console.log('✅ Quejas del usuario:', quejasUsuario);
+                    console.log(' Quejas del usuario:', quejasUsuario);
                     
                     const totalQuejas = quejasUsuario.length;
                     const quejasResueltas = quejasUsuario.filter(q => q.estado === 'RESUELTA').length;
@@ -397,14 +397,14 @@
                     // Actualizar quejas recientes
                     mostrarQuejasRecientes(quejasUsuario.slice(0, 5));
                 } else {
-                    console.warn('⚠️ Respuesta no tiene el formato esperado:', response);
+                    console.warn('️ Respuesta no tiene el formato esperado:', response);
                 }
             } catch (error) {
-                console.error('❌ Error al cargar datos:', error);
+                console.error(' Error al cargar datos:', error);
                 
                 // Intentar con el endpoint específico para usuario si el general falla
                 try {
-                    console.log('🔄 Intentando con endpoint específico de usuario...');
+                    console.log(' Intentando con endpoint específico de usuario...');
                     const user = authService.getCurrentUser();
                     const usuario = user.usuario || user.correo;
                     const response = await authService.authenticatedFetch(`/api/quejas/usuario/${usuario}`);
@@ -423,7 +423,7 @@
                         mostrarQuejasRecientes(quejas.slice(0, 5));
                     }
                 } catch (error2) {
-                    console.error('❌ Error con endpoint específico:', error2);
+                    console.error(' Error con endpoint específico:', error2);
                     // Mantener datos por defecto si hay error
                 }
             }

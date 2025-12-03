@@ -38,9 +38,9 @@ public class QuejaController {
     public ResponseEntity<?> crearQueja(@RequestBody QuejaRequest quejaRequest, 
                                        @RequestHeader("Authorization") String authHeader) {
         try {
-            System.out.println("📝 [QuejaController] Recibiendo nueva queja...");
-            System.out.println("📋 Título: " + quejaRequest.getTitulo());
-            System.out.println("🏪 Comercio: " + quejaRequest.getComercio());
+            System.out.println(" [QuejaController] Recibiendo nueva queja...");
+            System.out.println(" Título: " + quejaRequest.getTitulo());
+            System.out.println(" Comercio: " + quejaRequest.getComercio());
             
             String token = extraerToken(authHeader);
             
@@ -61,11 +61,11 @@ public class QuejaController {
             response.put("fecha", quejaCreada.getFecha());
             response.put("usuario", quejaCreada.getUsuario());
             
-            System.out.println("✅ [QuejaController] Queja creada: " + quejaCreada.getQuejaId());
+            System.out.println(" [QuejaController] Queja creada: " + quejaCreada.getQuejaId());
             return ResponseEntity.ok(response);
             
         } catch (RuntimeException e) {
-            System.err.println("❌ [QuejaController] Error: " + e.getMessage());
+            System.err.println(" [QuejaController] Error: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
@@ -75,7 +75,7 @@ public class QuejaController {
     @GetMapping
     public ResponseEntity<?> obtenerTodasLasQuejas(@RequestHeader("Authorization") String authHeader) {
         try {
-            System.out.println("📊 [QuejaController] Obteniendo todas las quejas...");
+            System.out.println(" [QuejaController] Obteniendo todas las quejas...");
             String token = extraerToken(authHeader);
             List<Queja> quejas = quejaService.obtenerTodasLasQuejas(token);
             
@@ -83,11 +83,11 @@ public class QuejaController {
             response.put("total", quejas.size());
             response.put("quejas", quejas);
             
-            System.out.println("✅ [QuejaController] Encontradas " + quejas.size() + " quejas");
+            System.out.println(" [QuejaController] Encontradas " + quejas.size() + " quejas");
             return ResponseEntity.ok(response);
             
         } catch (RuntimeException e) {
-            System.err.println("❌ [QuejaController] Error obteniendo quejas: " + e.getMessage());
+            System.err.println(" [QuejaController] Error obteniendo quejas: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(403).body(error); // 403 Forbidden para acceso denegado
@@ -98,7 +98,7 @@ public class QuejaController {
     public ResponseEntity<?> obtenerQuejasPorUsuario(@PathVariable String usuario,
                                                    @RequestHeader("Authorization") String authHeader) {
         try {
-            System.out.println("👤 [QuejaController] Obteniendo quejas para usuario: " + usuario);
+            System.out.println(" [QuejaController] Obteniendo quejas para usuario: " + usuario);
             String token = extraerToken(authHeader);
             List<Queja> quejas = quejaService.obtenerQuejasPorUsuario(usuario, token);
             
@@ -107,11 +107,11 @@ public class QuejaController {
             response.put("total", quejas.size());
             response.put("quejas", quejas);
             
-            System.out.println("✅ [QuejaController] Encontradas " + quejas.size() + " quejas para " + usuario);
+            System.out.println(" [QuejaController] Encontradas " + quejas.size() + " quejas para " + usuario);
             return ResponseEntity.ok(response);
             
         } catch (RuntimeException e) {
-            System.err.println("❌ [QuejaController] Error obteniendo quejas de usuario: " + e.getMessage());
+            System.err.println(" [QuejaController] Error obteniendo quejas de usuario: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
@@ -121,12 +121,12 @@ public class QuejaController {
     @GetMapping("/mis-quejas")
     public ResponseEntity<?> obtenerMisQuejas(@RequestHeader("Authorization") String authHeader) {
         try {
-            System.out.println("👤 [QuejaController] Obteniendo mis quejas...");
+            System.out.println(" [QuejaController] Obteniendo mis quejas...");
             String token = extraerToken(authHeader);
             
             // Obtener usuario del token
             String usuario = quejaService.obtenerUsuarioDesdeToken(token);
-            System.out.println("👤 Usuario autenticado: " + usuario);
+            System.out.println(" Usuario autenticado: " + usuario);
             
             List<Queja> quejas = quejaService.obtenerQuejasPorUsuario(usuario, token);
             
@@ -135,11 +135,11 @@ public class QuejaController {
             response.put("total", quejas.size());
             response.put("quejas", quejas);
             
-            System.out.println("✅ [QuejaController] Encontradas " + quejas.size() + " quejas propias");
+            System.out.println(" [QuejaController] Encontradas " + quejas.size() + " quejas propias");
             return ResponseEntity.ok(response);
             
         } catch (RuntimeException e) {
-            System.err.println("❌ [QuejaController] Error obteniendo mis quejas: " + e.getMessage());
+            System.err.println(" [QuejaController] Error obteniendo mis quejas: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
@@ -155,16 +155,16 @@ public class QuejaController {
             
             return quejaService.obtenerQuejaPorId(quejaId, token)
                     .map(queja -> {
-                        System.out.println("✅ [QuejaController] Queja encontrada: " + quejaId);
+                        System.out.println(" [QuejaController] Queja encontrada: " + quejaId);
                         return ResponseEntity.ok(queja);
                     })
                     .orElseGet(() -> {
-                        System.out.println("❌ [QuejaController] Queja no encontrada: " + quejaId);
+                        System.out.println(" [QuejaController] Queja no encontrada: " + quejaId);
                         return ResponseEntity.notFound().build();
                     });
                     
         } catch (RuntimeException e) {
-            System.err.println("❌ [QuejaController] Error obteniendo queja: " + e.getMessage());
+            System.err.println(" [QuejaController] Error obteniendo queja: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
@@ -174,12 +174,12 @@ public class QuejaController {
     @GetMapping("/estadisticas/total")
     public ResponseEntity<?> obtenerTotalQuejas(@RequestHeader("Authorization") String authHeader) {
         try {
-            System.out.println("📈 [QuejaController] Obteniendo estadísticas...");
+            System.out.println(" [QuejaController] Obteniendo estadísticas...");
             String token = extraerToken(authHeader);
             
             // Verificar si es PROFECO
             String rol = quejaService.obtenerRolDesdeToken(token);
-            System.out.println("🎭 Rol del usuario: " + rol);
+            System.out.println(" Rol del usuario: " + rol);
             
             if (!"profeco".equals(rol)) {
                 throw new RuntimeException("Solo PROFECO puede ver estadísticas");
@@ -191,11 +191,11 @@ public class QuejaController {
             response.put("totalQuejas", total);
             response.put("fechaConsulta", new Date().toString());
             
-            System.out.println("✅ [QuejaController] Total de quejas: " + total);
+            System.out.println(" [QuejaController] Total de quejas: " + total);
             return ResponseEntity.ok(response);
             
         } catch (RuntimeException e) {
-            System.err.println("❌ [QuejaController] Error obteniendo estadísticas: " + e.getMessage());
+            System.err.println(" [QuejaController] Error obteniendo estadísticas: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(403).body(error);
@@ -205,7 +205,7 @@ public class QuejaController {
     @GetMapping("/estadisticas/resumen")
     public ResponseEntity<?> obtenerResumenEstadisticas(@RequestHeader("Authorization") String authHeader) {
         try {
-            System.out.println("📊 [QuejaController] Obteniendo resumen estadístico...");
+            System.out.println(" [QuejaController] Obteniendo resumen estadístico...");
             String token = extraerToken(authHeader);
             
             // Verificar si es PROFECO
@@ -237,11 +237,11 @@ public class QuejaController {
             response.put("resueltas", resueltas);
             response.put("fechaConsulta", new Date().toString());
             
-            System.out.println("✅ [QuejaController] Resumen generado");
+            System.out.println(" [QuejaController] Resumen generado");
             return ResponseEntity.ok(response);
             
         } catch (RuntimeException e) {
-            System.err.println("❌ [QuejaController] Error en resumen: " + e.getMessage());
+            System.err.println(" [QuejaController] Error en resumen: " + e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.status(403).body(error);

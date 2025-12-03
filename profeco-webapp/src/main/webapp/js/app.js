@@ -9,7 +9,7 @@ class ProfecoApp {
         // Verificar autenticación al cargar
         await this.checkAuth();
         this.setupEventListeners();
-        
+
         // Ocultar loading
         setTimeout(() => {
             document.getElementById('loading').classList.add('hidden');
@@ -20,9 +20,9 @@ class ProfecoApp {
         try {
             const response = await fetch('/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: {'Content-Type': 'application/json'}
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 if (data.status === 'authenticated') {
@@ -44,18 +44,18 @@ class ProfecoApp {
     showAuthenticatedView() {
         // Mostrar navbar con usuario
         this.renderNavbar();
-        
+
         // Mostrar template de dashboard
         const template = document.getElementById('template-dashboard');
         const content = template.content.cloneNode(true);
         document.getElementById('content').innerHTML = '';
         document.getElementById('content').appendChild(content);
-        
+
         // Mostrar/ocultar menú admin según rol
         if (this.currentUser.rol === 'profeco') {
             document.getElementById('admin-menu').classList.remove('d-none');
         }
-        
+
         // Cargar dashboard por defecto
         this.loadDashboard();
     }
@@ -63,13 +63,13 @@ class ProfecoApp {
     showLoginView() {
         // Ocultar navbar
         document.getElementById('navbar').classList.add('hidden');
-        
+
         // Mostrar template de login
         const template = document.getElementById('template-login');
         const content = template.content.cloneNode(true);
         document.getElementById('content').innerHTML = '';
         document.getElementById('content').appendChild(content);
-        
+
         // Configurar formulario de login
         const form = document.getElementById('login-form');
         if (form) {
@@ -80,7 +80,7 @@ class ProfecoApp {
     renderNavbar() {
         const navbar = document.getElementById('navbar');
         navbar.classList.remove('hidden');
-        
+
         const userInfo = document.getElementById('user-info');
         if (this.currentUser) {
             userInfo.innerHTML = `
@@ -99,13 +99,13 @@ class ProfecoApp {
 
     async handleLogin(event) {
         event.preventDefault();
-        
+
         const usuario = document.getElementById('usuario').value;
         const contrasena = document.getElementById('contrasena').value;
-        
+
         try {
             const result = await authService.login(usuario, contrasena);
-            
+
             if (result.token) {
                 this.currentUser = {
                     usuario: result.usuario,
@@ -142,7 +142,7 @@ class ProfecoApp {
             <div id="dashboard-stats"></div>
             <div id="recent-quejas" class="mt-4"></div>
         `;
-        
+
         // Cargar estadísticas
         await this.loadStats();
         // Cargar quejas recientes
@@ -181,7 +181,7 @@ class ProfecoApp {
         try {
             const quejas = await quejasService.getMyQuejas();
             const container = document.getElementById('recent-quejas');
-            
+
             if (quejas && quejas.length > 0) {
                 let html = `
                     <div class="card">
@@ -191,7 +191,7 @@ class ProfecoApp {
                         <div class="card-body">
                             <div class="list-group">
                 `;
-                
+
                 quejas.slice(0, 5).forEach(queja => {
                     html += `
                         <div class="list-group-item list-group-item-action queja-card mb-2">
@@ -210,7 +210,7 @@ class ProfecoApp {
                         </div>
                     `;
                 });
-                
+
                 html += `
                             </div>
                         </div>
@@ -277,7 +277,7 @@ class ProfecoApp {
                 </div>
             </div>
         `;
-        
+
         // Configurar formulario
         const form = document.getElementById('queja-form');
         if (form) {
@@ -287,14 +287,14 @@ class ProfecoApp {
 
     async handleCrearQueja(event) {
         event.preventDefault();
-        
+
         const quejaData = {
             titulo: document.getElementById('queja-titulo').value,
             descripcion: document.getElementById('queja-descripcion').value,
             comercio: document.getElementById('queja-comercio').value,
             usuario: this.currentUser.usuario
         };
-        
+
         try {
             const result = await quejasService.crearQueja(quejaData);
             this.showSuccess('Queja registrada exitosamente');
@@ -309,14 +309,15 @@ class ProfecoApp {
     }
 
     async loadAdmin() {
-        if (this.currentUser.rol !== 'profeco') return;
-        
+        if (this.currentUser.rol !== 'profeco')
+            return;
+
         // Implementar vista admin
     }
 
     showError(message) {
-        const alert = document.getElementById('login-alert') || 
-                     document.getElementById('queja-alert');
+        const alert = document.getElementById('login-alert') ||
+                document.getElementById('queja-alert');
         if (alert) {
             alert.textContent = message;
             alert.className = 'alert alert-danger';

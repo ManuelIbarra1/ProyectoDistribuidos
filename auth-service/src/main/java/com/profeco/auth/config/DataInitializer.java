@@ -40,9 +40,9 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.save(consumidor);
             usuarioRepository.save(profeco);
             
-            System.out.println("✅ Usuarios por defecto creados:");
-            System.out.println("   👤 maria@email.com / password123");
-            System.out.println("   🔧 profeco@email.com / admin123");
+            System.out.println(" Usuarios por defecto creados:");
+            System.out.println("    maria@email.com / password123");
+            System.out.println("    profeco@email.com / admin123");
         }
     }
 }

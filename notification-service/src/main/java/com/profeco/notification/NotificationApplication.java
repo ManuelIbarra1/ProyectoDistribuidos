@@ -23,7 +23,7 @@ public class NotificationApplication {
             )
             .run(args);
         
-        System.out.println("🔔 Notification Service running on port 8083");
-        System.out.println("👂 Listening to RabbitMQ queue: profeco.notificaciones");
+        System.out.println(" Notification Service running on port 8083");
+        System.out.println(" Listening to RabbitMQ queue: profeco.notificaciones");
     }
 }

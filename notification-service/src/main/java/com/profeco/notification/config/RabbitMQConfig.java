@@ -16,7 +16,7 @@ public class RabbitMQConfig {
     
     @Bean
     public Queue notificacionesQueue() {
-        return new Queue("profeco.notificaciones", true); // durable=true
+        return new Queue("profeco.notificaciones", true);
     }
     
     @Bean

@@ -35,10 +35,10 @@ public class NotificationService {
             String mensajeJson = objectMapper.writeValueAsString(notificacion);
             rabbitTemplate.convertAndSend("profeco.notificaciones", mensajeJson);
             
-            System.out.println("📤 Notificación JSON enviada a RabbitMQ: " + mensajeJson);
+            System.out.println(" Notificación JSON enviada a RabbitMQ: " + mensajeJson);
             
         } catch (Exception e) {
-            System.err.println("❌ Error enviando notificación JSON: " + e.getMessage());
+            System.err.println(" Error enviando notificación JSON: " + e.getMessage());
             e.printStackTrace();
         }
     }

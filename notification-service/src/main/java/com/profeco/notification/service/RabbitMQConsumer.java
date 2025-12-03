@@ -17,7 +17,7 @@ public class RabbitMQConsumer {
     @RabbitListener(queues = "profeco.notificaciones")
     public void recibirNotificacion(Notificacion notificacion) { // ← Cambiar a recibir el objeto directamente
         try {
-            System.out.println("📨 Objeto Notificacion recibido de RabbitMQ:");
+            System.out.println(" Objeto Notificacion recibido de RabbitMQ:");
             System.out.println("   Destinatario: " + notificacion.getDestinatario());
             System.out.println("   Asunto: " + notificacion.getAsunto());
             System.out.println("   Tipo: " + notificacion.getTipo());
@@ -25,22 +25,22 @@ public class RabbitMQConsumer {
             procesarNotificacion(notificacion);
             
         } catch (Exception e) {
-            System.err.println("❌ Error procesando notificación: " + e.getMessage());
+            System.err.println(" Error procesando notificación: " + e.getMessage());
             e.printStackTrace();
         }
     }
     
     private void procesarNotificacion(Notificacion notificacion) {
         // Simular envío de notificación
-        System.out.println("✅ ENVIANDO NOTIFICACIÓN:");
-        System.out.println("   📧 Para: " + notificacion.getDestinatario());
-        System.out.println("   📝 Asunto: " + notificacion.getAsunto());
-        System.out.println("   📄 Mensaje: " + notificacion.getMensaje());
-        System.out.println("   🏷️ Tipo: " + notificacion.getTipo());
-        System.out.println("   🔗 Queja ID: " + notificacion.getQuejaId());
-        System.out.println("   ⏰ Timestamp: " + notificacion.getTimestamp());
+        System.out.println(" ENVIANDO NOTIFICACIÓN:");
+        System.out.println("    Para: " + notificacion.getDestinatario());
+        System.out.println("    Asunto: " + notificacion.getAsunto());
+        System.out.println("    Mensaje: " + notificacion.getMensaje());
+        System.out.println("   ️ Tipo: " + notificacion.getTipo());
+        System.out.println("    Queja ID: " + notificacion.getQuejaId());
+        System.out.println("    Timestamp: " + notificacion.getTimestamp());
         
         notificacion.setEnviada(true);
-        System.out.println("🎯 Notificación procesada exitosamente");
+        System.out.println(" Notificación procesada exitosamente");
     }
 }
